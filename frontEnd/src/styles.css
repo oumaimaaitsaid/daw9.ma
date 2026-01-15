@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #D4AF37;
+  --primary-hover: #C5A028;
+  --secondary: #221610;
+  --background-light: #FAF9F6;
+  --background-dark: #1A1412;
+  --text-slate-900: #1A1A1A;
+  --text-slate-500: #717171;
+  --text-white: #ffffff;
+}
+
+body {
+  font-family: 'Public Sans', sans-serif;
+  color: var(--text-slate-900);
+  background-color: var(--background-light);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-serif-luxury {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+.tracking-boutique {
+  letter-spacing: -0.04em;
+}
+
+/* Luxury Fade Animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Material Symbols - must match font loaded in index.html */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* Smooth Architectural Transitions */
+* {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Section Spacing */
+.section-padding {
+  @apply py-20 lg:py-32;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+@layer utilities {
+  .shadow-luxury { box-shadow: 0 40px 100px -20px rgba(26, 26, 26, 0.15), 0 0 40px rgba(212, 175, 55, 0.05); }
+  .shadow-premium { box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.03); }
+}
+
+@layer components {
+  /* --- Luxury Buttons --- */
+  .btn-luxury-primary {
+    @apply px-10 py-5 bg-secondary text-white rounded-full font-serif font-bold text-lg hover:bg-primary transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 cursor-pointer;
+  }
+  .btn-luxury-secondary {
+    @apply px-10 py-5 bg-white text-secondary rounded-full font-serif font-bold text-lg hover:bg-background-light hover:text-primary transition-all border border-primary/5 cursor-pointer;
+  }
+  .btn-action-icon {
+    @apply w-12 h-12 bg-white rounded-2xl shadow-premium border border-primary/5 flex items-center justify-center hover:bg-primary text-secondary hover:text-white transition-all duration-500 cursor-pointer;
+  }
+  .btn-action-danger {
+    @apply w-12 h-12 bg-white rounded-2xl shadow-premium border border-primary/5 flex items-center justify-center hover:bg-red-500 text-red-500 hover:text-white transition-all duration-500 cursor-pointer;
+  }
+  .btn-icon-close {
+    @apply w-16 h-16 bg-white rounded-full flex items-center justify-center text-secondary hover:bg-secondary hover:text-white transition-all shadow-premium cursor-pointer;
+  }
+
+  /* --- Luxury Inputs & Forms --- */
+  .input-luxury {
+    @apply w-full px-8 py-5 rounded-[25px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-serif italic text-xl transition-all shadow-sm;
+  }
+  .input-luxury-sm {
+    @apply w-full px-8 py-5 rounded-[20px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-medium text-xs transition-all shadow-sm;
+  }
+  .select-luxury {
+    @apply w-full px-8 py-5 rounded-[25px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-serif italic text-lg transition-all appearance-none shadow-sm;
+  }
+  .textarea-luxury {
+    @apply w-full px-8 py-5 rounded-[30px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-serif italic text-lg transition-all shadow-sm;
+  }
+  .label-luxury {
+    @apply text-[10px] font-black text-secondary uppercase tracking-widest ml-4 block;
+  }
+
+  /* --- Luxury Containers & Cards --- */
+  .card-luxury {
+    @apply bg-white rounded-[50px] shadow-luxury border border-primary/5 overflow-hidden;
+  }
+  .modal-luxury-container {
+    @apply fixed inset-0 bg-secondary/80 backdrop-blur-xl flex items-center justify-center z-[100] p-6 lg:p-12;
+  }
+  .modal-luxury-content {
+    @apply bg-background-light rounded-[60px] shadow-2xl w-full max-w-4xl max-h-full overflow-hidden flex flex-col border border-white/10;
+  }
+
+  /* --- Luxury Typography --- */
+  .title-luxury {
+    @apply font-serif text-5xl font-bold text-secondary italic;
+  }
+  .title-luxury-md {
+    @apply font-serif text-4xl font-bold text-secondary italic;
+  }
+  .title-luxury-sm {
+    @apply font-serif text-3xl font-bold text-secondary italic;
+  }
+  .subtitle-luxury {
+    @apply text-[10px] font-black text-primary uppercase tracking-[0.4em];
+  }
+
+  /* --- Luxury Tables --- */
+  .table-th-luxury {
+    @apply px-10 py-8 text-left text-[9px] font-black text-secondary uppercase tracking-[0.3em];
+  }
+  .table-td-luxury {
+    @apply px-10 py-8;
+  }
+  .table-tr-luxury {
+    @apply hover:bg-background-light/50 transition-all duration-500 border-b border-primary/5 last:border-0;
+  }
+  
+  /* --- Luxury Media --- */
+  .image-container-luxury {
+    @apply relative w-24 h-24 rounded-[30px] overflow-hidden shadow-lg border border-primary/10;
+  }
+}
