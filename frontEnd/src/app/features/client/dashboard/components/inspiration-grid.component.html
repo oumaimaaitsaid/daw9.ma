@@ -1,0 +1,143 @@
+    <div class="border-r border-primary/5 overflow-y-auto px-8 py-10 scroll-hidden bg-white/40 h-full">
+      <div class="flex items-center justify-between mb-8 reveal">
+        <div>
+          <h2 class="font-serif text-2xl font-bold text-secondary">Moodboard</h2>
+          <div class="w-8 h-[2px] bg-primary mt-1"></div>
+        </div>
+        <span class="text-[10px] font-bold text-primary bg-primary/5 px-3 py-1 rounded-full uppercase tracking-widest">
+          {{ moodboard.length }} Inspirations
+        </span>
+      </div>
+
+      @if (moodboard.length === 0) {
+        <app-empty-state 
+          icon="mop" 
+          title="Moodboard Vide" 
+          description="Ajoutez vos inspirations (images, styles) pour que notre IA puisse composer votre événement sur mesure.">
+        </app-empty-state>
+      } @else {
+        <!-- Local Uploads Section -->
+        @if (localUploads.length > 0) {
+          <div class="mb-10 reveal">
+            <p class="text-[9px] font-bold text-primary uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+               <span class="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></span>
+               En cours d'analyse
+            </p>
+            <div class="grid grid-cols-1 gap-4">
+              @for (local of localUploads; track local.id) {
+                <div class="group relative bg-white min-h-[100px] rounded-3xl overflow-hidden border border-primary/5 shadow-premium">
+                  <div class="flex">
+                    <div class="w-28 relative overflow-hidden h-28">
+                      <img [src]="local.url" loading="lazy" class="w-full h-full object-cover">
+                      <div class="absolute inset-0 bg-secondary/40 backdrop-blur-[2px] flex items-center justify-center">
+                        <div class="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                      </div>
+                    </div>
+                    <div class="flex-1 p-5 pr-8 flex items-center">
+                      <div>
+                        <p class="font-serif text-lg font-bold text-secondary mb-1 leading-tight">Traitement IA...</p>
+                        <span class="inline-flex items-center gap-2 mt-1 px-3 py-1 bg-background rounded-full border border-primary/5">
+                            <span class="text-[9px] font-bold text-text-muted uppercase tracking-widest">Extraction des données</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @for (cat of ['NEGAFA', 'ZIANA', 'TRAITEUR', 'PHOTOGRAPHE', 'DJ']; track cat) {
+          @if (getImagesByCategorie(cat).length > 0) {
+            <div class="mb-10 reveal">
+              <p class="text-[9px] font-bold text-primary uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                 <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
+                 {{ cat }}
+              </p>
+              <div class="grid grid-cols-1 gap-4">
+                @for (img of getImagesByCategorie(cat); track img.id) {
+                  <div class="group relative bg-white min-h-[100px] rounded-3xl overflow-hidden border border-primary/5 shadow-premium hover:shadow-2xl hover:shadow-secondary/5 transition-all duration-500 hover:-translate-y-1">
+                    <div class="flex">
+                      <div class="w-28 relative overflow-hidden h-28">
+                        <img [src]="'http://localhost:8080' + img.imageUrl" loading="lazy"
+                             (click)="onZoom.emit(img)"
+                             class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-700">
+                         <div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                           <span class="material-symbols-outlined text-white text-sm">zoom_in</span>
+                         </div>
+                      </div>
+                      <div class="flex-1 p-5 pr-8">
+                        <div class="flex justify-between items-start">
+                          <div>
+                            <p class="font-serif text-lg font-bold text-secondary mb-1 leading-tight">{{ formatSousCategorie(img.sousCategorie) }}</p>
+                            @if (img.couleurDominante) {
+                              <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-background rounded-full border border-primary/5">
+                                <span class="w-2 h-2 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.1)]" [style.background-color]="getCouleurCode(img.couleurDominante)"></span>
+                                <span class="text-[9px] font-bold text-text-muted uppercase tracking-widest">{{ img.couleurDominante }}</span>
+                              </span>
+                            }
+                          </div>
+                          <div class="bg-primary/10 px-2 py-1 rounded text-[8px] font-black text-primary uppercase tracking-tighter">
+                             {{ img.confidence }}% AI
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button (click)="onDelete.emit(img.id)"
+                            class="absolute -right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm text-red-500 w-8 h-8 rounded-full border border-red-100 shadow-lg opacity-0 group-hover:right-3 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center hover:bg-red-500 hover:text-white">
+                      <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Section pour les images non classées ou en cours -->
+        @if (getImagesByCategorie(null).length > 0) {
+          <div class="mb-10 reveal">
+            <p class="text-[9px] font-bold text-text-muted uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+               <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+               Autres / En cours d'analyse
+            </p>
+            <div class="grid grid-cols-1 gap-4">
+              @for (img of getImagesByCategorie(null); track img.id) {
+                <div class="group relative bg-white/60 min-h-[100px] rounded-3xl overflow-hidden border border-dashed border-primary/20 shadow-sm transition-all duration-500">
+                  <div class="flex">
+                    <div class="w-28 relative overflow-hidden h-28">
+                      <img [src]="'http://localhost:8080' + img.imageUrl" loading="lazy"
+                           class="w-full h-full object-cover opacity-60">
+                       <div class="absolute inset-0 flex items-center justify-center">
+                         @if (img.analysisStatus === 'PENDING') {
+                            <div class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                         } @else if (img.analysisStatus === 'FAILED') {
+                            <span class="material-symbols-outlined text-red-400">error</span>
+                         }
+                       </div>
+                    </div>
+                    <div class="flex-1 p-5 pr-8 flex items-center">
+                      <div>
+                        @if (img.analysisStatus === 'PENDING') {
+                          <p class="font-serif text-base font-bold text-text-muted italic">Analyse en cours...</p>
+                        } @else if (img.analysisStatus === 'FAILED') {
+                          <p class="font-serif text-base font-bold text-red-400">Échec de l'analyse</p>
+                          <span class="text-[9px] font-bold text-text-muted uppercase tracking-widest">Image non reconnue</span>
+                        } @else {
+                          <p class="font-serif text-base font-bold text-text-muted italic">Non classé</p>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <button (click)="onDelete.emit(img.id)"
+                          class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm text-red-500 w-8 h-8 rounded-full border border-red-100 shadow-lg flex items-center justify-center hover:bg-red-500 hover:text-white">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
