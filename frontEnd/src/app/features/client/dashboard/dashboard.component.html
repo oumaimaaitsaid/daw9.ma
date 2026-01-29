@@ -1,0 +1,457 @@
+    <div class="h-full flex flex-col bg-background font-sans">
+      <!-- Overlay de chargement pendant l'upload -->
+      @if (uploadingCount > 0) {
+        <div class="fixed inset-0 bg-secondary/60 backdrop-blur-sm flex items-center justify-center z-[100]">
+          <div class="premium-card bg-white rounded-[40px] p-12 text-center max-w-sm mx-4 shadow-2xl">
+            <div class="w-20 h-20 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 class="font-serif text-2xl font-bold text-secondary mb-3">Analyse AI</h3>
+            <p class="text-xs text-text-muted mb-2 tracking-wide uppercase">Traitement de {{ uploadingCount }} image{{ uploadingCount > 1 ? 's' : '' }}</p>
+            <p class="text-[10px] font-bold text-primary uppercase tracking-widest">Classification en cours...</p>
+          </div>
+        </div>
+      }
+
+      <!-- Header Premium -->
+      <div class="bg-white/80 backdrop-blur-md border-b border-primary/5 relative z-40">
+        <div class="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="reveal">
+            <h1 class="font-serif text-3xl font-bold text-secondary flex items-center gap-3">
+              Mon Espace <span class="text-primary italic font-medium text-2xl lowercase font-sans">Conciergerie</span>
+            </h1>
+            <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em] mt-1">
+              {{ activeTab === 'inspirations' ? 'Personnalisation de votre expÃ©rience exclusive' : 'Exploration de notre collection privÃ©e' }}
+            </p>
+          </div>
+          
+          <div class="flex items-center gap-6">
+            @if (activeTab === 'inspirations') {
+              <div class="flex gap-4 reveal">
+                <label class="group relative px-6 py-3 bg-white border border-secondary text-secondary rounded-full cursor-pointer hover:bg-secondary hover:text-white transition-all duration-500 overflow-hidden shadow-lg shadow-secondary/5"
+                       [class.bg-secondary]="isDragging"
+                       [class.text-white]="isDragging"
+                       (dragover)="onDragOver($event)"
+                       (dragleave)="onDragLeave($event)"
+                       (drop)="onDrop($event)">
+                  <input type="file" class="hidden" accept="image/*" multiple (change)="onFilesSelected($event)">
+                  <span class="relative z-10 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">add_photo_alternate</span>
+                    {{ isDragging ? 'DÃ©poser ici' : 'Ajouter Inspirations' }}
+                  </span>
+                </label>
+                <button (click)="findMatches()"
+                        [disabled]="moodboard.length === 0 || loading"
+                        class="px-8 py-3 bg-primary text-white rounded-full hover:bg-secondary transition-all duration-500 shadow-xl shadow-primary/20 disabled:opacity-30 disabled:grayscale">
+                  <span class="text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm animate-pulse" *ngIf="loading">neurology</span>
+                    {{ loading ? 'Analyse IA...' : 'Trouver mes Matchs' }}
+                  </span>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Navigation Tabs Premium -->
+        <div class="max-w-[1600px] mx-auto px-8">
+          <div class="flex flex-wrap gap-4 md:gap-12 pb-2">
+            <button (click)="switchTab('inspirations')"
+                    [class]="activeTab === 'inspirations' ? 'relative py-4 text-[10px] font-bold text-secondary uppercase tracking-[0.2em] border-b-2 border-primary' : 'relative py-4 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] hover:text-secondary transition-colors'">
+              <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">auto_awesome</span>
+                Moodboard IA
+              </span>
+            </button>
+            <button (click)="switchTab('catalogue')"
+                    [class]="activeTab === 'catalogue' ? 'relative py-4 text-[10px] font-bold text-secondary uppercase tracking-[0.2em] border-b-2 border-primary' : 'relative py-4 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] hover:text-secondary transition-colors'">
+              <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">menu_book</span>
+                Catalogue Collection
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenu selon l'onglet actif -->
+      @if (activeTab === 'inspirations') {
+        <!-- 1 Ã  3 colonnes - Vue Inspirations -->
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-0 overflow-y-auto lg:overflow-hidden bg-[#FBFBF9]">
+
+          <!-- Column 1: Inspirations (Moodboard) -->
+          <app-inspiration-grid [moodboard]="moodboard"
+                                [localUploads]="localUploads"
+                                (onZoom)="zoomImage($event)"
+                                (onDelete)="deleteImage($event)">
+          </app-inspiration-grid>
+
+          <!-- Column 2: Selection (Ma SÃ©lection) -->
+          <div class="border-b lg:border-b-0 lg:border-r border-primary/5 bg-white overflow-y-auto px-4 md:px-8 py-10 scroll-hidden reveal">
+            <div class="flex items-center justify-between mb-8">
+              <div>
+                <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">SÃ©lection</h2>
+                <div class="w-8 h-[2px] bg-primary mt-1"></div>
+              </div>
+              @if (hasSelection()) {
+                <span class="text-[9px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">
+                   En cours de crÃ©ation
+                </span>
+              }
+            </div>
+
+            @if (!hasSelection()) {
+              <div class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-primary/10 rounded-[30px] opacity-40">
+                <div class="w-20 h-20 bg-background rounded-full flex items-center justify-center mb-6">
+                  <span class="material-symbols-outlined text-3xl text-secondary/30">concierge</span>
+                </div>
+                <p class="font-serif text-xl text-secondary mb-2 italic">Votre sÃ©lection est vide</p>
+                <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest px-10 leading-relaxed">Parcourez le catalogue ou utilisez l'IA pour composer votre Ã©vÃ©nement</p>
+              </div>
+            } @else {
+              <div class="space-y-4">
+                @for (key of getSelectionKeys(); track key) {
+                  <div class="group relative bg-background/50 rounded-2xl p-5 border border-primary/5 hover:bg-white hover:shadow-xl hover:shadow-secondary/5 transition-all duration-500">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-2">{{ formatSousCategorie(key) }}</p>
+                        <p class="font-serif text-lg font-bold text-secondary leading-tight">{{ selection[key]?.nom }}</p>
+                        <p class="text-[10px] font-bold text-text-muted mt-2 uppercase tracking-widest">
+                          {{ selection[key]?.prixParPersonne ? selection[key]?.prixParPersonne + ' MAD / PERS' : selection[key]?.prix + ' MAD' }}
+                        </p>
+                      </div>
+                      <button (click)="removeSelection(key)" class="text-text-muted hover:text-red-500 transition-colors">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="mt-12 pt-8 border-t border-primary/10">
+                <div class="flex justify-between items-center mb-8">
+                  <div>
+                    <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em] mb-1">Estimation Totale</p>
+                    <span class="font-serif text-3xl font-bold text-secondary">{{ calculateTotal() }} <span class="text-lg font-sans text-primary">MAD</span></span>
+                  </div>
+                </div>
+                <button (click)="openReservationModal()"
+                        [disabled]="!hasSelection()"
+                        class="w-full bg-secondary text-white py-5 rounded-2xl font-serif font-bold text-lg hover:bg-primary transition-all duration-500 shadow-2xl shadow-secondary/10 hover:shadow-primary/20 disabled:opacity-30 flex items-center justify-center gap-3 group">
+                   <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">workspace_premium</span>
+                   RÃ©server l'ExpÃ©rience
+                </button>
+                <p class="text-center text-[9px] text-text-muted uppercase tracking-widest mt-6 italic">Devis provisoire soumis Ã  validation concierge</p>
+              </div>
+            }
+          </div>
+
+          <!-- Column 3: AI Matches (Suggestions IA) -->
+          <div class="overflow-y-auto px-4 md:px-8 py-10 scroll-hidden reveal">
+            <div class="mb-10">
+              <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">Matchs IA</h2>
+              <p class="text-[9px] font-bold text-primary uppercase tracking-[0.4em] mt-1 italic">Intelligence PrÃ©dictive</p>
+              <div class="w-8 h-[2px] bg-primary mt-2"></div>
+            </div>
+
+            @if (loading) {
+              <div class="space-y-10 reveal">
+                @for (i of [1,2]; track i) {
+                  <div>
+                    <app-skeleton width="150px" height="12px" class="mb-4"></app-skeleton>
+                    @for (j of [1,2]; track j) {
+                      <div class="bg-white p-5 rounded-[30px] mb-4 border border-primary/5 flex gap-5 items-center">
+                        <app-skeleton width="80px" height="80px" borderRadius="16px"></app-skeleton>
+                        <div class="flex-1 space-y-3">
+                          <app-skeleton width="70%" height="20px"></app-skeleton>
+                          <app-skeleton width="40%" height="12px"></app-skeleton>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else if (!suggestions || getSuggestionKeys().length === 0) {
+              <app-empty-state 
+                icon="cognition" 
+                title="En attente d'inspirations" 
+                description="L'algorithme a besoin d'images dans votre moodboard pour gÃ©nÃ©rer vos suggestions personnalisÃ©es.">
+              </app-empty-state>
+            } @else {
+              @for (sousCategorie of getSuggestionKeys(); track sousCategorie) {
+                <div class="mb-10 reveal">
+                  <p class="text-[10px] font-bold text-secondary uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm text-primary">verified</span>
+                    RecommandÃ© : {{ formatSousCategorie(sousCategorie) }}
+                  </p>
+                  @for (item of suggestions[sousCategorie]; track item.id) {
+                    <div class="group bg-white p-5 rounded-[30px] mb-4 border border-primary/5 shadow-premium hover:shadow-2xl hover:shadow-primary/5 transition-all duration-700 relative overflow-hidden">
+                      <div class="flex gap-5 items-center">
+                        <div class="w-20 h-20 rounded-2xl overflow-hidden shadow-inner flex-shrink-0">
+                        @if (item.images && item.images.length > 0) {
+                             <img [src]="'http://localhost:8080' + item.images[0]" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                          } @else {
+                             <div class="w-full h-full bg-background flex items-center justify-center italic text-[9px] text-text-muted">No Image</div>
+                          }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="font-serif text-base font-bold text-secondary truncate mb-1 leading-tight">{{ item.nom }}</p>
+                          <p class="text-[10px] font-bold text-primary uppercase tracking-widest">
+                            {{ item.prixParPersonne ? item.prixParPersonne + ' MAD / PERS' : item.prix + ' MAD' }}
+                          </p>
+                        </div>
+                        <button (click)="addToSelection(item, sousCategorie)"
+                                class="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center hover:bg-primary transition-all duration-500 shadow-xl shadow-secondary/10 group-hover:scale-110">
+                          <span class="material-symbols-outlined text-lg">add</span>
+                        </button>
+                      </div>
+                      <!-- Decorative Accent -->
+                      <div class="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors"></div>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+    } @else {
+      <!-- Boutique Catalogue View -->
+      <div class="flex-1 flex overflow-hidden bg-background">
+        <!-- Luxury Sidebar -->
+        <div class="w-80 bg-white/40 backdrop-blur-lg border-r border-primary/5 overflow-y-auto flex-shrink-0 scroll-hidden selection:bg-primary/10">
+          <div class="p-8 border-b border-primary/5">
+            <h3 class="font-serif text-xl font-bold text-secondary uppercase tracking-tight">Collections</h3>
+            <p class="text-[9px] font-bold text-primary uppercase tracking-[0.3em] mt-1 italic">Private Selection</p>
+          </div>
+          <nav class="p-6 space-y-4">
+
+            <!-- ===== NEGAFA ===== -->
+            <div class="reveal">
+              <button (click)="toggleSection('negafa')"
+                      class="w-full flex items-center justify-between px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all duration-500 shadow-sm group">
+                <span class="font-serif text-base font-bold text-secondary group-hover:text-primary transition-colors">MaÃ¯tres Negafa</span>
+                <span class="material-symbols-outlined text-sm text-primary transition-transform duration-500" [class.rotate-180]="expandedSections.negafa">expand_more</span>
+              </button>
+              @if (expandedSections.negafa) {
+                <div class="ml-4 mt-4 space-y-2 border-l-2 border-primary/10 pl-6 reveal">
+                  <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mb-3 opacity-60">Tenues MariÃ©e</p>
+                  <button (click)="loadItemsByCategory('caftan', 'negafa')" [class]="selectedSousCategorie === 'caftan' ? 'nav-item-active' : 'nav-item'">Caftan Royal</button>
+                  <button (click)="loadItemsByCategory('takchita', 'negafa')" [class]="selectedSousCategorie === 'takchita' ? 'nav-item-active' : 'nav-item'">Takchita Haute Couture</button>
+                  <button (click)="loadItemsByCategory('lebsa', 'negafa')" [class]="selectedSousCategorie === 'lebsa' ? 'nav-item-active' : 'nav-item'">Lebsa Traditionnelle</button>
+                  <button (click)="loadItemsByCategory('robe-moderne', 'negafa')" [class]="selectedSousCategorie === 'robe-moderne' ? 'nav-item-active' : 'nav-item'">Robe de Gala</button>
+                  
+                  <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mt-6 mb-3 opacity-60">Accessoires</p>
+                  <button (click)="loadItemsByCategory('bijoux', 'negafa')" [class]="selectedSousCategorie === 'bijoux' ? 'nav-item-active' : 'nav-item'">Parures & Joyaux</button>
+                  <button (click)="loadItemsByCategory('amariya', 'negafa')" [class]="selectedSousCategorie === 'amariya' ? 'nav-item-active' : 'nav-item'">Amariya Royale</button>
+                </div>
+              }
+            </div>
+
+            <!-- ===== ZIANA ===== -->
+            <button (click)="loadCategoryFull('ziana')"
+                    [class]="selectedCategorie === 'ziana' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
+              <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'ziana'">Ziana & BeautÃ©</span>
+            </button>
+
+            <!-- ===== TRAITEUR ===== -->
+            <div class="reveal">
+              <button (click)="toggleSection('traiteur')"
+                      class="w-full flex items-center justify-between px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all duration-500 shadow-sm group">
+                <span class="font-serif text-base font-bold text-secondary group-hover:text-primary transition-colors">Gastronomie</span>
+                <span class="material-symbols-outlined text-sm text-primary transition-transform duration-500" [class.rotate-180]="expandedSections.traiteur">expand_more</span>
+              </button>
+              @if (expandedSections.traiteur) {
+                <div class="ml-4 mt-4 space-y-2 border-l-2 border-primary/10 pl-6 reveal">
+                  <button (click)="loadItemsByCategory('entrees', 'traiteur')" [class]="selectedSousCategorie === 'entrees' ? 'nav-item-active' : 'nav-item'">EntrÃ©es Gourmandes</button>
+                  <button (click)="loadItemsByCategory('plats-principaux', 'traiteur')" [class]="selectedSousCategorie === 'plats-principaux' ? 'nav-item-active' : 'nav-item'">Plats de Signature</button>
+                  <button (click)="loadItemsByCategory('patisseries', 'traiteur')" [class]="selectedSousCategorie === 'patisseries' ? 'nav-item-active' : 'nav-item'">PÃ¢tisseries Fines</button>
+                  <button (click)="loadItemsByCategory('gateau-mariage', 'traiteur')" [class]="selectedSousCategorie === 'gateau-mariage' ? 'nav-item-active' : 'nav-item'">PiÃ¨ce MontÃ©e</button>
+                </div>
+              }
+            </div>
+
+            <!-- ===== PHOTOGRAPHE ===== -->
+            <button (click)="loadCategoryFull('photographe')"
+                    [class]="selectedCategorie === 'photographe' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
+              <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'photographe'">Art Visuel</span>
+            </button>
+
+            <!-- ===== DJ ===== -->
+            <button (click)="loadCategoryFull('dj')"
+                    [class]="selectedCategorie === 'dj' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
+              <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'dj'">Ambiance & DJ</span>
+            </button>
+
+          </nav>
+        </div>
+
+        <!-- Catalogue Discovery Grid -->
+        <div class="flex-1 bg-[#FBFBF9] overflow-y-auto px-10 py-12 scroll-hidden">
+          @if (loadingCatalogue) {
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 reveal">
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <div class="bg-white rounded-[40px] p-6 border border-primary/5 space-y-4">
+                  <app-skeleton width="100%" height="250px" borderRadius="32px"></app-skeleton>
+                  <app-skeleton width="60%" height="20px"></app-skeleton>
+                  <app-skeleton width="40%" height="12px"></app-skeleton>
+                  <div class="flex justify-between items-center pt-4">
+                    <app-skeleton width="80px" height="24px"></app-skeleton>
+                    <app-skeleton width="40px" height="40px" [circle]="true"></app-skeleton>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (catalogueItems.length === 0) {
+            <app-empty-state 
+              icon="search_off" 
+              title="Explorez nos Collections" 
+              description="Veuillez sÃ©lectionner une catÃ©gorie dans le menu de gauche pour dÃ©couvrir nos piÃ¨ces d'exception.">
+            </app-empty-state>
+          } @else {
+            <div class="mb-12 reveal">
+              <h2 class="font-serif text-4xl font-bold text-secondary flex items-baseline gap-4">
+                {{ getCategorieLabel(selectedCategorie) }}
+                <span class="text-primary text-xl font-normal italic font-sans" *ngIf="selectedSousCategorie">
+                   {{ getSousCategorieLabel(selectedSousCategorie) }}
+                </span>
+              </h2>
+              <div class="flex items-center gap-4 mt-2">
+                <div class="w-12 h-[1px] bg-primary"></div>
+                <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">{{ catalogueItems.length }} piÃ¨ces disponibles</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              @for (item of catalogueItems; track item.id) {
+                <div class="group bg-white rounded-[40px] shadow-premium hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-700 reveal p-3 border border-primary/5">
+                  <div class="relative aspect-[4/5] rounded-[32px] overflow-hidden mb-6">
+                    @if (item.images && item.images.length > 0) {
+                      <img [src]="'http://localhost:8080' + item.images[0]" loading="lazy"
+                           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 cursor-pointer"
+                           (click)="zoomCatalogueItem(item)">
+                    } @else {
+                      <div class="w-full h-full bg-background flex items-center justify-center italic text-text-muted">No Image</div>
+                    }
+                    <div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                    
+                    <button (click)="reserveItemDirectly(item)"
+                            [disabled]="submitting"
+                            class="absolute bottom-6 right-6 px-6 py-3 bg-white text-secondary rounded-full flex items-center justify-center gap-2 shadow-2xl hover:bg-primary hover:text-white transition-all duration-500 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 scale-90 hover:scale-100 disabled:opacity-50">
+                      <span class="material-symbols-outlined text-sm">event_available</span>
+                      <span class="text-[10px] font-bold uppercase tracking-widest">{{ submitting ? 'Chargement...' : 'RÃ©server' }}</span>
+                    </button>
+                  </div>
+                  
+                  <div class="px-5 pb-5">
+                    <p class="text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-2">{{ formatSousCategorie(item.sousCategorie || '') }}</p>
+                    <h3 class="font-serif text-xl font-bold text-secondary mb-2 group-hover:text-primary transition-colors leading-tight">{{ item.nom }}</h3>
+                    <p class="text-[11px] text-text-muted line-clamp-2 mb-6 font-medium leading-relaxed">{{ item.description }}</p>
+                    <div class="flex items-center justify-between border-t border-primary/5 pt-4">
+                      <span class="font-serif text-lg font-bold text-secondary">
+                        {{ item.prixParPersonne ? item.prixParPersonne : item.prix }} <span class="text-xs font-sans text-primary">MAD</span>
+                        <span class="text-[9px] font-bold text-text-muted" *ngIf="item.prixParPersonne"> / PERS</span>
+                      </span>
+                      <span class="text-[8px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-1 rounded">PiÃ¨ce Unique</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Float Selection Toggle (Mobile/Tablet) -->
+        @if (hasSelection()) {
+           <!-- We could implement a float button here, but sticking to desktop layout for now -->
+        }
+      </div>
+    }
+    </div>
+
+    <!-- Boutique Reservation Modal -->
+    @if (showReservationModal) {
+      <div class="fixed inset-0 bg-secondary/80 backdrop-blur-xl flex items-center justify-center z-[200] p-4 reveal">
+        <div class="premium-card bg-white rounded-[50px] p-12 w-full max-w-2xl shadow-luxury relative overflow-hidden">
+          <button (click)="closeReservationModal()" class="absolute top-10 right-10 text-text-muted hover:text-secondary transition-all">
+            <span class="material-symbols-outlined text-2xl">close</span>
+          </button>
+
+          <div class="mb-12">
+            <h3 class="font-serif text-4xl font-bold text-secondary mb-3">Privatisation</h3>
+            <p class="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Demande de RÃ©servation Exclusive</p>
+          </div>
+
+          <!-- Recap Selection Luxury -->
+          <div class="grid grid-cols-2 gap-8 mb-12">
+            <div class="bg-[#FBFBF9] rounded-[32px] p-8 border border-primary/5">
+              <p class="text-[9px] font-black text-secondary uppercase tracking-widest mb-6">Votre Collection SÃ©lectionnÃ©e</p>
+              <div class="space-y-4 max-h-[200px] overflow-y-auto pr-4 scroll-hidden">
+                @for (key of getSelectionKeys(); track key) {
+                  <div class="flex justify-between items-center border-b border-primary/5 pb-3">
+                    <div>
+                       <p class="text-[8px] font-bold text-primary uppercase tracking-tighter">{{ formatSousCategorie(key) }}</p>
+                       <p class="font-serif text-sm font-bold text-secondary">{{ selection[key]?.nom }}</p>
+                    </div>
+                    <span class="text-[9px] font-bold text-text-muted italic">{{ selection[key]?.prixParPersonne ? selection[key]?.prixParPersonne + ' MAD/PERS' : selection[key]?.prix + ' MAD' }}</span>
+                  </div>
+                }
+              </div>
+              <div class="mt-8 flex justify-between items-center">
+                <span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Estimation</span>
+                <span class="font-serif text-2xl font-bold text-primary">{{ calculateTotal() }} <span class="text-xs font-sans">MAD</span></span>
+              </div>
+            </div>
+            <div class="space-y-6">
+              <form [formGroup]="reservationForm" (ngSubmit)="submitReservation()">
+                <div class="mb-6">
+                  <label class="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-3 text-left">Message (Optionnel)</label>
+                  <textarea formControlName="message" rows="3"
+                            class="w-full px-6 py-4 bg-background border border-primary/10 rounded-2xl focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm outline-none resize-none"
+                            placeholder="Souhaits spécifiques..."></textarea>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="bg-secondary p-8 rounded-[32px] flex items-center justify-between shadow-2xl shadow-secondary/20 reveal">
+             <div>
+                <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">Total Final EstimÃ©</p>
+                <span class="font-serif text-4xl font-bold text-white">{{ calculateTotalWithInvites() }} <span class="text-lg font-sans text-primary-light">MAD</span></span>
+             </div>
+             <button (click)="submitReservation()" [disabled]="submitting"
+                     class="px-8 py-3 bg-primary text-white rounded-full font-serif font-bold text-base hover:bg-white hover:text-secondary transition-all duration-500 disabled:opacity-30">
+                {{ submitting ? 'Transmission...' : 'Confirmer la Demande' }}
+             </button>
+          </div>
+          
+          <p class="text-center text-[8px] text-text-muted uppercase tracking-[0.3em] mt-8">Un conseiller concierge vous contactera sous 24h pour finaliser les dÃ©tails.</p>
+        </div>
+      </div>
+    }
+
+    <!-- Luxury Success Message -->
+    @if (successMessage) {
+      <div class="fixed bottom-12 right-12 bg-secondary text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-primary/20">
+        <span class="material-symbols-outlined text-primary text-2xl">check_circle</span>
+        <div>
+          <p class="font-serif text-lg font-bold">Demande Transmise</p>
+          <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest">{{ successMessage }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Luxury Zoom Modal -->
+    @if (zoomedImage) {
+      <div class="fixed inset-0 bg-secondary/95 backdrop-blur-2xl flex items-center justify-center z-[300] p-8 reveal" (click)="closeZoom()">
+        <div class="relative max-w-6xl max-h-[90vh] reveal-scale" (click)="$event.stopPropagation()">
+          <button (click)="closeZoom()"
+                  class="absolute -top-16 right-0 text-white/50 hover:text-white transition-all">
+            <span class="material-symbols-outlined text-4xl">close</span>
+          </button>
+          <img [src]="'http://localhost:8080' + zoomedImage.imageUrl" loading="lazy"
+               class="max-w-full max-h-[85vh] object-contain rounded-[40px] shadow-luxury border-4 border-white/5">
+          <div class="absolute -bottom-16 left-0 right-0 text-center">
+             <p class="font-serif text-2xl font-bold text-white mb-1">{{ formatSousCategorie(zoomedImage.sousCategorie || '') }}</p>
+             <p class="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">{{ zoomedImage.categorie }} Collection</p>
+          </div>
+        </div>
+      </div>
+    }
