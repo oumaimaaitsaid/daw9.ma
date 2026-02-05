@@ -1,0 +1,80 @@
+<div class="space-y-12 reveal">
+  <!-- Header Excellence -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+    <div>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-[1px] bg-primary"></span>
+        <p class="subtitle-luxury">Gestion du Catalogue</p>
+      </div>
+      <h1 class="title-luxury">Collection {{ label() }}</h1>
+      <p class="text-text-muted text-[11px] mt-4 font-medium uppercase tracking-[0.2em] max-w-lg leading-relaxed italic">Curatage et maintenance de l'excellence opérationnelle.</p>
+    </div>
+    
+    <button (click)="openForm()" class="btn-luxury-primary group">
+      <span class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform">add</span>
+      <span>Inscrire une nouvelle pièce</span>
+    </button>
+  </div>
+
+  <!-- Search Bar Discovery -->
+  <div class="relative group max-w-2xl reveal">
+    <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">search</span>
+    <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+           placeholder="Rechercher dans la collection {{ label() }}..."
+           class="input-luxury pl-16">
+  </div>
+
+  <!-- Luxury Table / Registry -->
+  <app-catalogue-table
+    [items]="items"
+    [loading]="loading"
+    [filteredItems]="filteredItems"
+    [serverUrl]="serverUrl"
+    (onEdit)="edit($event)"
+    (onDelete)="delete($event)"
+    (onOpenForm)="openForm()">
+  </app-catalogue-table>
+</div>
+
+<!-- Modal Formulaire Luxury Overlay -->
+<app-catalogue-form
+  [showForm]="showForm"
+  [isEdit]="isEdit"
+  [saving]="saving"
+  [currentItem]="currentItem"
+  [sousCategorie]="sousCategorie"
+  [serverUrl]="serverUrl"
+  [couleursStr]="couleursStr"
+  [taillesStr]="taillesStr"
+  [matieresStr]="matieresStr"
+  [stylesStr]="stylesStr"
+  [styleProfileStyle]="styleProfileStyle"
+  [styleProfilePalette]="styleProfilePalette"
+  [styleProfileAmbiance]="styleProfileAmbiance"
+  [styleProfileBudget]="styleProfileBudget"
+  (onClose)="closeForm()"
+  (onSave)="save($event)"
+  (onFiles)="files = $event">
+</app-catalogue-form>
+
+<!-- Luxury Success Toast -->
+@if (successMessage()) {
+  <div class="fixed bottom-12 right-12 bg-secondary text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-primary/20">
+    <span class="material-symbols-outlined text-primary text-2xl">check_circle</span>
+    <div>
+      <p class="font-serif text-lg font-bold">Opération Réussie</p>
+      <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest">{{ successMessage() }}</p>
+    </div>
+  </div>
+}
+
+<!-- Luxury Error Toast -->
+@if (errorMessage()) {
+  <div class="fixed bottom-12 right-12 bg-red-600 text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-white/10">
+    <span class="material-symbols-outlined text-white text-2xl">error</span>
+    <div>
+      <p class="font-serif text-lg font-bold">Action Interrompue</p>
+      <p class="text-[9px] font-bold text-white/80 uppercase tracking-widest">{{ errorMessage() }}</p>
+    </div>
+  </div>
+}
