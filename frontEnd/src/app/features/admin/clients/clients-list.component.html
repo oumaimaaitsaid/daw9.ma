@@ -1,0 +1,128 @@
+<div class="space-y-12 bg-transparent reveal">
+  <!-- Header Excellence -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+    <div>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-[1px] bg-primary"></span>
+        <p class="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Annuaire de la Clientèle</p>
+      </div>
+      <h1 class="font-serif text-5xl font-bold text-secondary italic">Cercle des Ambassadeurs</h1>
+      <p class="text-text-muted text-[11px] mt-4 font-medium uppercase tracking-[0.2em] max-w-lg leading-relaxed italic">Gestion privilégiée de notre communauté d'exception.</p>
+    </div>
+    
+    <div class="bg-white px-10 py-6 rounded-[35px] border border-primary/5 shadow-premium flex items-center gap-6">
+       <div class="relative">
+          <div class="w-16 h-16 bg-secondary/5 rounded-full flex items-center justify-center">
+             <span class="material-symbols-outlined text-primary text-3xl">diversity_1</span>
+          </div>
+       </div>
+       <div>
+          <p class="text-[9px] font-black text-secondary uppercase tracking-widest">Membres Actifs</p>
+          <span class="font-serif text-xl font-bold text-primary">{{ filteredClients().length }} Profils Filtrés</span>
+       </div>
+    </div>
+  </div>
+
+  <!-- Controls & Search -->
+  <div class="relative group max-w-2xl">
+    <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">person_search</span>
+    <input type="text" [ngModel]="searchQuery()" (ngModelChange)="updateSearchQuery($event)"
+           placeholder="Rechercher un ambassadeur (nom, ville, email...)"
+           class="input-luxury w-full pl-16">
+  </div>
+
+  <!-- Luxury Directory Table -->
+  <div class="bg-white rounded-[50px] shadow-luxury border border-primary/5 overflow-hidden">
+    @if (loading()) {
+      <div class="p-24 text-center">
+        <div class="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-6"></div>
+        <p class="text-[9px] font-black text-primary uppercase tracking-widest">Synchronisation du cercle...</p>
+      </div>
+    } @else if (filteredClients().length === 0) {
+      <div class="p-24 text-center">
+        <div class="w-20 h-20 bg-background rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+           <span class="material-symbols-outlined text-3xl text-primary/40">person_off</span>
+        </div>
+        <h3 class="title-luxury mb-2">Aucune Correspondance</h3>
+        <p class="text-text-muted text-[10px] uppercase tracking-widest font-bold">Ce profil n'a pas encore rejoint notre cercle d'exception.</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-background-light/50 border-b border-primary/5">
+              <th class="table-th-luxury">Ambassadeur</th>
+              <th class="table-th-luxury">Insigne Email</th>
+              <th class="table-th-luxury">Résidence & Contact</th>
+              <th class="table-th-luxury">Prestige & Budget</th>
+              <th class="table-th-luxury">Date d'Événement</th>
+              <th class="table-th-luxury text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-primary/5">
+            @for (client of filteredClients(); track client.id) {
+              <tr class="table-tr-luxury group">
+                <td class="table-td-luxury">
+                  <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center text-primary font-serif font-bold text-xl shadow-lg border border-white/10 group-hover:scale-110 transition-transform duration-700">
+                      {{ client.prenom[0] }}{{ client.nom[0] }}
+                    </div>
+                    <div>
+                      <p class="font-serif text-lg font-bold text-secondary italic leading-none mb-2 uppercase">{{ client.prenom }} {{ client.nom }}</p>
+                      <p class="text-[8px] text-primary font-black tracking-[0.2em] uppercase">Client Gradé</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="table-td-luxury">
+                   <p class="text-[11px] font-medium text-secondary/60 font-serif italic">{{ client.email }}</p>
+                </td>
+
+                <td class="table-td-luxury">
+                  <div class="flex flex-col">
+                    <span class="text-secondary font-bold text-sm leading-none mb-2">{{ client.ville || 'Région Indéfinie' | uppercase }}</span>
+                    <span class="text-[10px] text-text-muted font-medium tracking-wide">{{ client.phone || 'Contact Scellé' }}</span>
+                  </div>
+                </td>
+
+                <td class="table-td-luxury">
+                  <p class="font-serif text-xl font-bold text-secondary italic tracking-tight">{{ client.budget ? (client.budget | number) + ' MAD' : 'Budget Discret' }}</p>
+                  <p class="text-[8px] font-medium text-text-muted uppercase tracking-widest mt-1">Capacité Financière</p>
+                </td>
+
+                <td class="table-td-luxury">
+                  <div class="flex flex-col">
+                    <span class="font-serif text-lg font-bold text-secondary italic leading-none mb-2">{{ client.dateMarriage ? (client.dateMarriage | date:'dd MMM yyyy') : 'Date à Venir' }}</span>
+                    <span class="text-[8px] text-primary font-black uppercase tracking-widest">Événement Critique</span>
+                  </div>
+                </td>
+
+                <td class="table-td-luxury text-right">
+                   <button (click)="deleteClient(client)" 
+                           class="btn-action-icon hover:bg-red-500 text-red-600 hover:text-white translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 duration-700">
+                      <span class="material-symbols-outlined text-lg">person_remove</span>
+                   </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination Controls -->
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between px-10 py-6 bg-white border-t border-primary/5">
+           <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Page {{ currentPage() + 1 }} sur {{ totalPages() }}</p>
+           <div class="flex gap-2">
+             <button (click)="changePage(currentPage() - 1)" [disabled]="currentPage() === 0" class="btn-action-icon text-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/5">
+               <span class="material-symbols-outlined text-sm">chevron_left</span>
+             </button>
+             <button (click)="changePage(currentPage() + 1)" [disabled]="currentPage() === totalPages() - 1" class="btn-action-icon text-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/5">
+               <span class="material-symbols-outlined text-sm">chevron_right</span>
+             </button>
+           </div>
+        </div>
+      }
+    }
+  </div>
+</div>
