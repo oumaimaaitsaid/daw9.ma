@@ -1,0 +1,55 @@
+services:
+  # 1. القاعدة ديال البيانات (Database)
+  db:
+    image: postgres:15
+    container_name: daw9_db
+    environment:
+      - POSTGRES_DB=daw9_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5433:5432" # تقدري تدخلي ليها بـ pgAdmin من الويندوز باستعمال البورت 5433
+    networks:
+      - daw9-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d daw9_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. الـ API ديالك (Spring Boot)
+  api-service:
+    build: ./backEnd
+    container_name: daw9_api
+    ports:
+      - "8080:8080"
+    environment:
+      # ردي البال: استعملنا "db" حيت هو سميت الـ service اللي لفوق
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/daw9_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+    depends_on:
+      db:
+        condition: service_healthy # ما غاديش يقلع الـ API حتى تكون الـ DB واجدة
+    networks:
+      - daw9-network
+    volumes:
+      - ./backEnd/uploads:/app/uploads
+
+  # 3. الـ Frontend ديالي (Angular)
+  frontend:
+    build: ./frontEnd
+    container_name: daw9_front
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-service
+    networks:
+      - daw9-network
+
+volumes:
+  db_data: # Added back if needed, though db service didn't use it explicitly before
+
+networks:
+  daw9-network:
+    driver: bridge
