@@ -1,0 +1,50 @@
+# Universal Git Ignore for Daw9.ma
+
+# Backend (Spring Boot)
+/backEnd/target/
+/backEnd/bin/
+/backEnd/*.log
+/backEnd/.factorypath
+/backEnd/.project
+/backEnd/.settings/
+/backEnd/.classpath
+/backEnd/*.iml
+/backEnd/HELP.md
+/backEnd/logs/
+
+# Frontend (Angular)
+/frontEnd/node_modules/
+/frontEnd/dist/
+/frontEnd/tmp/
+/frontEnd/out-tsc/
+/frontEnd/bazel-out/
+/frontEnd/.angular/cache/
+/frontEnd/connect.lock
+/frontEnd/coverage/
+/frontEnd/typings/
+/frontEnd/__screenshots__/
+
+# Root level
+node_modules/
+package-lock.json
+
+# Uploaded Files (user data — never commit)
+uploads/
+
+# IDEs & System
+.idea/
+.vscode/
+.history/
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+*.tmp
+
+# Environment & Secrets
+.env
+.env.*
+
+# Misc
+*.log
