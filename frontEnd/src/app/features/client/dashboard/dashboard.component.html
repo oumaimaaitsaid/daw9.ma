@@ -1,4 +1,4 @@
-    <div class="h-full flex flex-col bg-background font-sans">
+﻿    <div class="h-full flex flex-col bg-background font-sans">
       <!-- Overlay de chargement pendant l'upload -->
       @if (uploadingCount > 0) {
         <div class="fixed inset-0 bg-secondary/60 backdrop-blur-sm flex items-center justify-center z-[100]">
@@ -19,7 +19,7 @@
               Mon Espace <span class="text-primary italic font-medium text-2xl lowercase font-sans">Conciergerie</span>
             </h1>
             <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em] mt-1">
-              {{ activeTab === 'inspirations' ? 'Personnalisation de votre expÃ©rience exclusive' : 'Exploration de notre collection privÃ©e' }}
+              {{ activeTab === 'inspirations' ? 'Personnalisation de votre expérience exclusive' : 'Exploration de notre collection privée' }}
             </p>
           </div>
           
@@ -35,7 +35,7 @@
                   <input type="file" class="hidden" accept="image/*" multiple (change)="onFilesSelected($event)">
                   <span class="relative z-10 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm">add_photo_alternate</span>
-                    {{ isDragging ? 'DÃ©poser ici' : 'Ajouter Inspirations' }}
+                    {{ isDragging ? 'Déposer ici' : 'Ajouter Inspirations' }}
                   </span>
                 </label>
                 <button (click)="findMatches()"
@@ -84,16 +84,16 @@
                                 (onDelete)="deleteImage($event)">
           </app-inspiration-grid>
 
-          <!-- Column 2: Selection (Ma SÃ©lection) -->
+          <!-- Column 2: Selection (Ma Sélection) -->
           <div class="border-b lg:border-b-0 lg:border-r border-primary/5 bg-white overflow-y-auto px-4 md:px-8 py-10 scroll-hidden reveal">
             <div class="flex items-center justify-between mb-8">
               <div>
-                <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">SÃ©lection</h2>
+                <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">Sélection</h2>
                 <div class="w-8 h-[2px] bg-primary mt-1"></div>
               </div>
               @if (hasSelection()) {
                 <span class="text-[9px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">
-                   En cours de crÃ©ation
+                   En cours de création
                 </span>
               }
             </div>
@@ -103,8 +103,8 @@
                 <div class="w-20 h-20 bg-background rounded-full flex items-center justify-center mb-6">
                   <span class="material-symbols-outlined text-3xl text-secondary/30">concierge</span>
                 </div>
-                <p class="font-serif text-xl text-secondary mb-2 italic">Votre sÃ©lection est vide</p>
-                <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest px-10 leading-relaxed">Parcourez le catalogue ou utilisez l'IA pour composer votre Ã©vÃ©nement</p>
+                <p class="font-serif text-xl text-secondary mb-2 italic">Votre sélection est vide</p>
+                <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest px-10 leading-relaxed">Parcourez le catalogue ou utilisez l'IA pour composer votre événement</p>
               </div>
             } @else {
               <div class="space-y-4">
@@ -137,7 +137,7 @@
                         [disabled]="!hasSelection()"
                         class="w-full bg-secondary text-white py-5 rounded-2xl font-serif font-bold text-lg hover:bg-primary transition-all duration-500 shadow-2xl shadow-secondary/10 hover:shadow-primary/20 disabled:opacity-30 flex items-center justify-center gap-3 group">
                    <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">workspace_premium</span>
-                   RÃ©server l'ExpÃ©rience
+                   Réserver l'Expérience
                 </button>
                 <p class="text-center text-[9px] text-text-muted uppercase tracking-widest mt-6 italic">Devis provisoire soumis Ã  validation concierge</p>
               </div>
@@ -148,7 +148,7 @@
           <div class="overflow-y-auto px-4 md:px-8 py-10 scroll-hidden reveal">
             <div class="mb-10">
               <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">Matchs IA</h2>
-              <p class="text-[9px] font-bold text-primary uppercase tracking-[0.4em] mt-1 italic">Intelligence PrÃ©dictive</p>
+              <p class="text-[9px] font-bold text-primary uppercase tracking-[0.4em] mt-1 italic">Intelligence Prédictive</p>
               <div class="w-8 h-[2px] bg-primary mt-2"></div>
             </div>
 
@@ -173,14 +173,14 @@
               <app-empty-state 
                 icon="cognition" 
                 title="En attente d'inspirations" 
-                description="L'algorithme a besoin d'images dans votre moodboard pour gÃ©nÃ©rer vos suggestions personnalisÃ©es.">
+                description="L'algorithme a besoin d'images dans votre moodboard pour générer vos suggestions personnalisées.">
               </app-empty-state>
             } @else {
               @for (sousCategorie of getSuggestionKeys(); track sousCategorie) {
                 <div class="mb-10 reveal">
                   <p class="text-[10px] font-bold text-secondary uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-sm text-primary">verified</span>
-                    RecommandÃ© : {{ formatSousCategorie(sousCategorie) }}
+                    Recommandé : {{ formatSousCategorie(sousCategorie) }}
                   </p>
                   @for (item of suggestions[sousCategorie]; track item.id) {
                     <div class="group bg-white p-5 rounded-[30px] mb-4 border border-primary/5 shadow-premium hover:shadow-2xl hover:shadow-primary/5 transition-all duration-700 relative overflow-hidden">
@@ -227,12 +227,12 @@
             <div class="reveal">
               <button (click)="toggleSection('negafa')"
                       class="w-full flex items-center justify-between px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all duration-500 shadow-sm group">
-                <span class="font-serif text-base font-bold text-secondary group-hover:text-primary transition-colors">MaÃ¯tres Negafa</span>
+                <span class="font-serif text-base font-bold text-secondary group-hover:text-primary transition-colors">Maïtres Negafa</span>
                 <span class="material-symbols-outlined text-sm text-primary transition-transform duration-500" [class.rotate-180]="expandedSections.negafa">expand_more</span>
               </button>
               @if (expandedSections.negafa) {
                 <div class="ml-4 mt-4 space-y-2 border-l-2 border-primary/10 pl-6 reveal">
-                  <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mb-3 opacity-60">Tenues MariÃ©e</p>
+                  <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mb-3 opacity-60">Tenues Mariée</p>
                   <button (click)="loadItemsByCategory('caftan', 'negafa')" [class]="selectedSousCategorie === 'caftan' ? 'nav-item-active' : 'nav-item'">Caftan Royal</button>
                   <button (click)="loadItemsByCategory('takchita', 'negafa')" [class]="selectedSousCategorie === 'takchita' ? 'nav-item-active' : 'nav-item'">Takchita Haute Couture</button>
                   <button (click)="loadItemsByCategory('lebsa', 'negafa')" [class]="selectedSousCategorie === 'lebsa' ? 'nav-item-active' : 'nav-item'">Lebsa Traditionnelle</button>
@@ -248,7 +248,7 @@
             <!-- ===== ZIANA ===== -->
             <button (click)="loadCategoryFull('ziana')"
                     [class]="selectedCategorie === 'ziana' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
-              <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'ziana'">Ziana & BeautÃ©</span>
+              <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'ziana'">Ziana & Beauté</span>
             </button>
 
             <!-- ===== TRAITEUR ===== -->
@@ -260,10 +260,10 @@
               </button>
               @if (expandedSections.traiteur) {
                 <div class="ml-4 mt-4 space-y-2 border-l-2 border-primary/10 pl-6 reveal">
-                  <button (click)="loadItemsByCategory('entrees', 'traiteur')" [class]="selectedSousCategorie === 'entrees' ? 'nav-item-active' : 'nav-item'">EntrÃ©es Gourmandes</button>
+                  <button (click)="loadItemsByCategory('entrees', 'traiteur')" [class]="selectedSousCategorie === 'entrees' ? 'nav-item-active' : 'nav-item'">Entrées Gourmandes</button>
                   <button (click)="loadItemsByCategory('plats-principaux', 'traiteur')" [class]="selectedSousCategorie === 'plats-principaux' ? 'nav-item-active' : 'nav-item'">Plats de Signature</button>
-                  <button (click)="loadItemsByCategory('patisseries', 'traiteur')" [class]="selectedSousCategorie === 'patisseries' ? 'nav-item-active' : 'nav-item'">PÃ¢tisseries Fines</button>
-                  <button (click)="loadItemsByCategory('gateau-mariage', 'traiteur')" [class]="selectedSousCategorie === 'gateau-mariage' ? 'nav-item-active' : 'nav-item'">PiÃ¨ce MontÃ©e</button>
+                  <button (click)="loadItemsByCategory('patisseries', 'traiteur')" [class]="selectedSousCategorie === 'patisseries' ? 'nav-item-active' : 'nav-item'">Pâtisseries Fines</button>
+                  <button (click)="loadItemsByCategory('gateau-mariage', 'traiteur')" [class]="selectedSousCategorie === 'gateau-mariage' ? 'nav-item-active' : 'nav-item'">Pièce Montée</button>
                 </div>
               }
             </div>
@@ -303,7 +303,7 @@
             <app-empty-state 
               icon="search_off" 
               title="Explorez nos Collections" 
-              description="Veuillez sÃ©lectionner une catÃ©gorie dans le menu de gauche pour dÃ©couvrir nos piÃ¨ces d'exception.">
+              description="Veuillez sélectionner une catégorie dans le menu de gauche pour découvrir nos pièces d'exception.">
             </app-empty-state>
           } @else {
             <div class="mb-12 reveal">
@@ -315,7 +315,7 @@
               </h2>
               <div class="flex items-center gap-4 mt-2">
                 <div class="w-12 h-[1px] bg-primary"></div>
-                <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">{{ catalogueItems.length }} piÃ¨ces disponibles</p>
+                <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">{{ catalogueItems.length }} pièces disponibles</p>
               </div>
             </div>
 
@@ -336,7 +336,7 @@
                             [disabled]="submitting"
                             class="absolute bottom-6 right-6 px-6 py-3 bg-white text-secondary rounded-full flex items-center justify-center gap-2 shadow-2xl hover:bg-primary hover:text-white transition-all duration-500 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 scale-90 hover:scale-100 disabled:opacity-50">
                       <span class="material-symbols-outlined text-sm">event_available</span>
-                      <span class="text-[10px] font-bold uppercase tracking-widest">{{ submitting ? 'Chargement...' : 'RÃ©server' }}</span>
+                      <span class="text-[10px] font-bold uppercase tracking-widest">{{ submitting ? 'Chargement...' : 'Réserver' }}</span>
                     </button>
                   </div>
                   
@@ -349,7 +349,7 @@
                         {{ item.prixParPersonne ? item.prixParPersonne : item.prix }} <span class="text-xs font-sans text-primary">MAD</span>
                         <span class="text-[9px] font-bold text-text-muted" *ngIf="item.prixParPersonne"> / PERS</span>
                       </span>
-                      <span class="text-[8px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-1 rounded">PiÃ¨ce Unique</span>
+                      <span class="text-[8px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-1 rounded">Pièce Unique</span>
                     </div>
                   </div>
                 </div>
@@ -376,13 +376,13 @@
 
           <div class="mb-12">
             <h3 class="font-serif text-4xl font-bold text-secondary mb-3">Privatisation</h3>
-            <p class="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Demande de RÃ©servation Exclusive</p>
+            <p class="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Demande de Réservation Exclusive</p>
           </div>
 
           <!-- Recap Selection Luxury -->
           <div class="grid grid-cols-2 gap-8 mb-12">
             <div class="bg-[#FBFBF9] rounded-[32px] p-8 border border-primary/5">
-              <p class="text-[9px] font-black text-secondary uppercase tracking-widest mb-6">Votre Collection SÃ©lectionnÃ©e</p>
+              <p class="text-[9px] font-black text-secondary uppercase tracking-widest mb-6">Votre Collection Sélectionnée</p>
               <div class="space-y-4 max-h-[200px] overflow-y-auto pr-4 scroll-hidden">
                 @for (key of getSelectionKeys(); track key) {
                   <div class="flex justify-between items-center border-b border-primary/5 pb-3">
@@ -413,7 +413,7 @@
 
           <div class="bg-secondary p-8 rounded-[32px] flex items-center justify-between shadow-2xl shadow-secondary/20 reveal">
              <div>
-                <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">Total Final EstimÃ©</p>
+                <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">Total Final Estimé</p>
                 <span class="font-serif text-4xl font-bold text-white">{{ calculateTotalWithInvites() }} <span class="text-lg font-sans text-primary-light">MAD</span></span>
              </div>
              <button (click)="submitReservation()" [disabled]="submitting"
@@ -422,7 +422,7 @@
              </button>
           </div>
           
-          <p class="text-center text-[8px] text-text-muted uppercase tracking-[0.3em] mt-8">Un conseiller concierge vous contactera sous 24h pour finaliser les dÃ©tails.</p>
+          <p class="text-center text-[8px] text-text-muted uppercase tracking-[0.3em] mt-8">Un conseiller concierge vous contactera sous 24h pour finaliser les détails.</p>
         </div>
       </div>
     }
