@@ -86,11 +86,21 @@ export class ClientDashboardComponent implements OnInit {
   isDragging = false;
   private fb = inject(FormBuilder);
   
+  minDate = new Date().toISOString().split('T')[0];
+
   reservationForm: FormGroup = this.fb.group({
-    dateEvenement: ['', Validators.required],
+    dateEvenement: ['', [Validators.required, this.futureDateValidator.bind(this)]],
     nombreInvites: [100, [Validators.required, Validators.min(10)]],
     message: ['']
   });
+
+  private futureDateValidator(control: any) {
+    if (!control.value) return null;
+    const date = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today ? null : { pastDate: true };
+  }
   readonly ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
 
   activeTab: 'inspirations' | 'catalogue' = 'inspirations';

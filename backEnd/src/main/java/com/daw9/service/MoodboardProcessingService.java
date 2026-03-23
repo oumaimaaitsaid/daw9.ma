@@ -33,14 +33,13 @@ public class MoodboardProcessingService {
             img.setSousCategorie(classification.sousCategorie());
             img.setConfidence(classification.confidence());
 
-            if (classification.categorie() == CategoriePrestataire.NEGAFA) {
-                var styleResult = imageAnalysisService.analyzeImage(imageData);
-                img.setStyle(styleResult.styleProfile().getStyle());
-                img.setPalette(styleResult.styleProfile().getPalette());
-                img.setAmbiance(styleResult.styleProfile().getAmbiance());
-                img.setBudgetPercu(styleResult.styleProfile().getBudgetPercu());
-                img.setCouleurDominante(styleResult.couleurDominante());
-            }
+            // Style + couleur analysis for ALL categories (not just NEGAFA)
+            var styleResult = imageAnalysisService.analyzeImage(imageData);
+            img.setCouleurDominante(styleResult.couleurDominante());
+            img.setStyle(styleResult.styleProfile().getStyle());
+            img.setPalette(styleResult.styleProfile().getPalette());
+            img.setAmbiance(styleResult.styleProfile().getAmbiance());
+            img.setBudgetPercu(styleResult.styleProfile().getBudgetPercu());
 
             img.setAnalysisStatus("DONE");
             log.info("Analysis [DONE] for image {}: {}/{}", imageId, classification.categorie(), classification.sousCategorie());

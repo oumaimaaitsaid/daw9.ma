@@ -22,6 +22,6 @@ export class MoodboardService {
   }
 
   getMatches(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/match`);
+    return this.http.get<any>(`${environment.apiUrl}/client/suggestions`);
   }
 }

@@ -45,6 +45,8 @@ Thumbs.db
 # Environment & Secrets
 .env
 .env.*
+# application.properties contains real API keys — local only
+/backEnd/src/main/resources/application.properties
 
 # Misc
 *.log

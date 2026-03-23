@@ -111,30 +111,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-8 mb-12">
-              <!-- Budget -->
-              <div>
-                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-3">Budget Prévu (MAD)</label>
-                <input type="number" formControlName="budget"
-                       [class.border-red-400]="form.get('budget')?.invalid && form.get('budget')?.touched"
-                       class="w-full px-6 py-4 bg-background border border-primary/10 rounded-2xl focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm outline-none"
-                       placeholder="50 000">
-                @if (form.get('budget')?.invalid && form.get('budget')?.touched) {
-                  <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-2 ml-4">Budget requis (min. 1000)</p>
-                }
-              </div>
 
-              <!-- Date Mariage -->
-              <div>
-                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-3">Date de l'événement</label>
-                <input type="date" formControlName="dateMarriage"
-                       [class.border-red-400]="form.get('dateMarriage')?.invalid && form.get('dateMarriage')?.touched"
-                       class="w-full px-6 py-4 bg-background border border-primary/10 rounded-2xl focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm outline-none">
-                @if (form.get('dateMarriage')?.invalid && form.get('dateMarriage')?.touched) {
-                  <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-2 ml-4">La date est requise</p>
-                }
-              </div>
-            </div>
 
             <!-- Error Message -->
             @if (error) {
@@ -183,9 +160,7 @@ export class RegisterClientComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     phone: ['', [Validators.required, Validators.pattern(/^(06|07|05)[0-9]{8}$/)]],
-    ville: ['', Validators.required],
-    budget: [null, [Validators.required, Validators.min(1000)]],
-    dateMarriage: ['', Validators.required]
+    ville: ['', Validators.required]
   });
 
   loading = false;

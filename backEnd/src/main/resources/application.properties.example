@@ -1,14 +1,15 @@
 # ========================================
-# Daw9.ma - Configuration
+# Daw9.ma - Configuration EXAMPLE
+# Copiez ce fichier en application.properties et remplissez vos vraies valeurs
 # ========================================
 
 # Server
 server.port=8080
 
 # PostgreSQL
-spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/daw9_db?characterEncoding=UTF-8}
-spring.datasource.username=${DB_USERNAME:postgres}
-spring.datasource.password=${DB_PASSWORD:admin}
+spring.datasource.url=jdbc:postgresql://localhost:5433/daw9_db?characterEncoding=UTF-8
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_DB_PASSWORD
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # JPA / Hibernate
@@ -19,17 +20,17 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
 # JWT
-jwt.secret=${JWT_SECRET:Daw9MaDefaultDevSecretKeyThatIsLongEnoughForHS256Algorithm2026}
+jwt.secret=Daw9MaDefaultDevSecretKeyThatIsLongEnoughForHS256Algorithm2026
 jwt.expiration=86400000
 
 # OpenAI API
-openai.api.key=${OPENAI_API_KEY:your-key-here}
+openai.api.key=YOUR_OPENAI_API_KEY_HERE
 openai.api.url=https://api.openai.com/v1/chat/completions
 openai.model=gpt-4o
 
 # Stripe (paiement)
-stripe.api.key=${STRIPE_API_KEY:sk_test_placeholder}
-stripe.webhook.secret=${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
+stripe.api.key=sk_test_placeholder
+stripe.webhook.secret=whsec_placeholder
 
 # File upload
 spring.servlet.multipart.max-file-size=10MB
