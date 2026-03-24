@@ -12,5 +12,7 @@ public enum NotificationType {
 
     // Admin
     PRESTATAIRE_A_VALIDER,
-    LITIGE_SIGNALE
+    LITIGE_SIGNALE,
+    STATUS_CHANGE,
+    NOUVELLE_RESERVATION
 }
