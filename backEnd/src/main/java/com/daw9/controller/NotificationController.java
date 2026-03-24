@@ -22,7 +22,7 @@ public class NotificationController {
     private final NotificationRepository notificationRepository;
 
     @GetMapping("/unread-count/{userId}")
-    public ResponseEntity<Long> getUnreadCount(@PathVariable Long userId) {
+    public ResponseEntity<Long> getUnreadCount(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(notificationRepository.countByUserIdAndIsReadFalse(userId));
     }
 
@@ -33,7 +33,7 @@ public class NotificationController {
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<Void> markAsRead(@PathVariable("id") Long id) {
         notificationRepository.findById(id).ifPresent(n -> {
             n.setIsRead(true);
             notificationRepository.save(n);
@@ -43,14 +43,14 @@ public class NotificationController {
 
     @DeleteMapping("/user/{userId}/clear")
     @Transactional
-    public ResponseEntity<Void> clearAllUserNotifications(@PathVariable Long userId) {
+    public ResponseEntity<Void> clearAllUserNotifications(@PathVariable("userId") Long userId) {
         notificationRepository.deleteByUserId(userId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNotification(@PathVariable("id") Long id) {
         try {
             if (notificationRepository.existsById(id)) {
                 notificationRepository.deleteById(id);

@@ -19,7 +19,7 @@ public class PublicCatalogueController {
     private final CatalogueService catalogueService;
 
     @GetMapping("/{categorie}")
-    public ResponseEntity<Page<CatalogueItem>> getByCategorie(@PathVariable String categorie, Pageable pageable) {
+    public ResponseEntity<Page<CatalogueItem>> getByCategorie(@PathVariable("categorie") String categorie, Pageable pageable) {
         log.info("Public access: Fetching items for category: {}", categorie);
         Page<CatalogueItem> items = catalogueService.findByCategorie(categorie, pageable);
         return ResponseEntity.ok(items);
@@ -27,8 +27,8 @@ public class PublicCatalogueController {
 
     @GetMapping("/{categorie}/{sousCategorie}")
     public ResponseEntity<Page<CatalogueItem>> getItems(
-            @PathVariable String categorie,
-            @PathVariable String sousCategorie,
+            @PathVariable("categorie") String categorie,
+            @PathVariable("sousCategorie") String sousCategorie,
             Pageable pageable) {
         log.info("Public access: Fetching items for category: {} and subcategory: {}", categorie, sousCategorie);
         Page<CatalogueItem> items = catalogueService

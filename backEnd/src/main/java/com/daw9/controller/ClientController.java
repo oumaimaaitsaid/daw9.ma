@@ -1,5 +1,6 @@
 package com.daw9.controller;
 
+import com.daw9.dto.ClientProfileDTO;
 import com.daw9.model.*;
 import com.daw9.repository.*;
 import com.daw9.service.FileStorageService;
@@ -10,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,18 +48,18 @@ public class ClientController {
 
     @Operation(summary = "Récupérer le profil client", description = "Retourne les informations du client connecté à partir du token JWT")
     @GetMapping("/profile")
-    public ResponseEntity<Client> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ClientProfileDTO> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         Client client = clientRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Client non trouvé"));
-        return ResponseEntity.ok(client);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé"));
+        return ResponseEntity.ok(ClientProfileDTO.fromEntity(client));
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<Client> updateProfile(
+    public ResponseEntity<ClientProfileDTO> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Client updateRequest) {
         Client client = clientRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Client non trouvé"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé"));
 
         if (updateRequest.getPhone() != null)
             client.setPhone(updateRequest.getPhone());
@@ -67,7 +70,8 @@ public class ClientController {
         if (updateRequest.getDateMarriage() != null)
             client.setDateMarriage(updateRequest.getDateMarriage());
 
-        return ResponseEntity.ok(clientRepository.save(client));
+        Client saved = clientRepository.save(client);
+        return ResponseEntity.ok(ClientProfileDTO.fromEntity(saved));
     }
 
     // ---- Moodboard ----
@@ -113,11 +117,11 @@ public class ClientController {
     @DeleteMapping("/moodboard/{imageId}")
     public ResponseEntity<Void> deleteMoodboardImage(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long imageId) {
+            @PathVariable("imageId") Long imageId) {
 
         Client client = getClient(userDetails);
         MoodboardImage image = moodboardImageRepository.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Image non trouvée"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image non trouvée"));
 
         if (!image.getClient().getId().equals(client.getId())) {
             return ResponseEntity.status(403).build();
@@ -143,13 +147,13 @@ public class ClientController {
 
     @GetMapping("/catalogue/{categorie}")
     public ResponseEntity<Page<CatalogueItem>> getCatalogueByCategorie(
-            @PathVariable String categorie, Pageable pageable) {
+            @PathVariable("categorie") String categorie, Pageable pageable) {
         return ResponseEntity.ok(catalogueService.findByCategorie(categorie, pageable));
     }
 
     @GetMapping("/catalogue/{categorie}/{sousCategorie}")
     public ResponseEntity<Page<CatalogueItem>> getCatalogueBySousCategorie(
-            @PathVariable String categorie, @PathVariable String sousCategorie, Pageable pageable) {
+            @PathVariable("categorie") String categorie, @PathVariable("sousCategorie") String sousCategorie, Pageable pageable) {
         return ResponseEntity.ok(catalogueService.findByCategorieAndSousCategorie(categorie, sousCategorie, pageable));
     }
 
@@ -175,7 +179,8 @@ public class ClientController {
         if (request.itemIds() != null) {
             for (Long itemId : request.itemIds()) {
                 CatalogueItem item = catalogueService.findById(itemId)
-                        .orElseThrow(() -> new RuntimeException("Article non trouvé: " + itemId));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Article non trouvé: " + itemId));
                 items.add(item);
                 if (item.getPrixParPersonne() != null && request.nombreInvites() != null) {
                     total = total.add(item.getPrixParPersonne().multiply(BigDecimal.valueOf(request.nombreInvites())));
@@ -203,7 +208,7 @@ public class ClientController {
 
     private Client getClient(UserDetails userDetails) {
         return clientRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Client non trouvé"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé"));
     }
 
     private MoodboardImage persistImage(MultipartFile file, Client client) {

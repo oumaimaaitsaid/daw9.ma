@@ -32,7 +32,7 @@ public class AdminCatalogueController {
     private static final String UPLOAD_DIR = "uploads/catalogue/";
 
     @GetMapping("/{categorie}")
-    public ResponseEntity<Page<CatalogueItem>> getByCategorie(@PathVariable String categorie, Pageable pageable) {
+    public ResponseEntity<Page<CatalogueItem>> getByCategorie(@PathVariable("categorie") String categorie, Pageable pageable) {
         log.info("Fetching items for category: {}", categorie);
         Page<CatalogueItem> items = catalogueService.findByCategorie(categorie, pageable);
         return ResponseEntity.ok(items);
@@ -40,8 +40,8 @@ public class AdminCatalogueController {
 
     @GetMapping("/{categorie}/{sousCategorie}")
     public ResponseEntity<Page<CatalogueItem>> getItems(
-            @PathVariable String categorie,
-            @PathVariable String sousCategorie,
+            @PathVariable("categorie") String categorie,
+            @PathVariable("sousCategorie") String sousCategorie,
             Pageable pageable) {
         Page<CatalogueItem> items = catalogueService
                 .findByCategorieAndSousCategorie(categorie, sousCategorie, pageable);
@@ -50,9 +50,9 @@ public class AdminCatalogueController {
 
     @GetMapping("/{categorie}/{sousCategorie}/{id}")
     public ResponseEntity<CatalogueItem> getItem(
-            @PathVariable String categorie,
-            @PathVariable String sousCategorie,
-            @PathVariable Long id) {
+            @PathVariable("categorie") String categorie,
+            @PathVariable("sousCategorie") String sousCategorie,
+            @PathVariable("id") Long id) {
         return catalogueService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -60,8 +60,8 @@ public class AdminCatalogueController {
 
     @PostMapping("/{categorie}/{sousCategorie}")
     public ResponseEntity<CatalogueItem> createItem(
-            @PathVariable String categorie,
-            @PathVariable String sousCategorie,
+            @PathVariable("categorie") String categorie,
+            @PathVariable("sousCategorie") String sousCategorie,
             @RequestPart("data") String dataJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
@@ -90,9 +90,9 @@ public class AdminCatalogueController {
 
     @PutMapping("/{categorie}/{sousCategorie}/{id}")
     public ResponseEntity<CatalogueItem> updateItem(
-            @PathVariable String categorie,
-            @PathVariable String sousCategorie,
-            @PathVariable Long id,
+            @PathVariable("categorie") String categorie,
+            @PathVariable("sousCategorie") String sousCategorie,
+            @PathVariable("id") Long id,
             @RequestPart("data") String dataJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         return catalogueService.findById(id)
@@ -126,9 +126,9 @@ public class AdminCatalogueController {
 
     @DeleteMapping("/{categorie}/{sousCategorie}/{id}")
     public ResponseEntity<Void> deleteItem(
-            @PathVariable String categorie,
-            @PathVariable String sousCategorie,
-            @PathVariable Long id) {
+            @PathVariable("categorie") String categorie,
+            @PathVariable("sousCategorie") String sousCategorie,
+            @PathVariable("id") Long id) {
         if (catalogueService.existsById(id)) {
             catalogueService.deleteById(id);
             log.info("Item supprimé: ID {} dans {}/{}", id, categorie, sousCategorie);

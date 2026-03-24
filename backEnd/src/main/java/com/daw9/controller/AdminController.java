@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @Slf4j
@@ -46,21 +45,21 @@ public class AdminController {
     // Client management
     @GetMapping("/clients")
     public ResponseEntity<Page<Client>> getClients(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(clientRepository.findAll(pageable));
     }
 
     @GetMapping("/clients/{id}")
-    public ResponseEntity<Client> getClient(@PathVariable Long id) {
+    public ResponseEntity<Client> getClient(@PathVariable("id") Long id) {
         return clientRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/clients/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable("id") Long id) {
         if (clientRepository.existsById(id)) {
             clientRepository.deleteById(id);
             log.info("Client {} supprimé par admin", id);
@@ -72,8 +71,8 @@ public class AdminController {
     // Reservations (demandes)
     @GetMapping("/reservations")
     public ResponseEntity<Page<DemandeReservation>> getAllReservations(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(demandeReservationRepository.findAll(pageable));
     }
@@ -89,7 +88,7 @@ public class AdminController {
     }
 
     @PutMapping("/reservations/{id}/confirm")
-    public ResponseEntity<DemandeReservation> confirmReservation(@PathVariable Long id) {
+    public ResponseEntity<DemandeReservation> confirmReservation(@PathVariable("id") Long id) {
         return demandeReservationRepository.findById(id)
                 .map(demande -> {
                     demande.setStatus(ReservationStatus.CONFIRMEE);
@@ -109,7 +108,7 @@ public class AdminController {
     }
 
     @PutMapping("/reservations/{id}/cancel")
-    public ResponseEntity<DemandeReservation> cancelReservation(@PathVariable Long id) {
+    public ResponseEntity<DemandeReservation> cancelReservation(@PathVariable("id") Long id) {
         return demandeReservationRepository.findById(id)
                 .map(demande -> {
                     demande.setStatus(ReservationStatus.ANNULEE);
