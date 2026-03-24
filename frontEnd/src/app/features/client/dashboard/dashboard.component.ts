@@ -85,7 +85,7 @@ export class ClientDashboardComponent implements OnInit {
   zoomedImage: MoodboardImage | null = null;
   isDragging = false;
   private fb = inject(FormBuilder);
-  
+
   minDate = new Date().toISOString().split('T')[0];
 
   reservationForm: FormGroup = this.fb.group({
@@ -256,11 +256,11 @@ export class ClientDashboardComponent implements OnInit {
           this.localUploads = this.localUploads.filter(lu => !newLocals.find(nl => nl.id === lu.id));
           this.uploadingCount = Math.max(0, this.uploadingCount - files.length);
           this.cdr.detectChanges();
-          
+
           if (err.status === 400) {
             this.toastService.error("L'analyse AI a échoué. Vérifiez le format de l'image.");
           } else {
-             this.toastService.error("Le serveur est momentanément indisponible.");
+            this.toastService.error("Le serveur est momentanément indisponible.");
           }
         }
       });
@@ -319,7 +319,8 @@ export class ClientDashboardComponent implements OnInit {
     for (const key of Object.keys(this.selection)) {
       const item = this.selection[key];
       if (item?.prixParPersonne) {
-        total += item.prixParPersonne * 100;
+        const guests = this.reservationForm.get('nombreInvites')?.value || 0;
+        total += item.prixParPersonne * guests;
       } else if (item?.prix) {
         total += item.prix;
       }
@@ -481,7 +482,7 @@ export class ClientDashboardComponent implements OnInit {
       'caftan': 'Caftan', 'takchita': 'Takchita', 'lebsa': 'Lebsa',
       'robe-moderne': 'Robe Moderne', 'jabador': 'Jabador', 'costume': 'Costume',
       'bijoux': 'Bijoux', 'amariya': 'Amariya', 'ziana': 'Ziana', 'entrees': 'Entrées',
-      'plats-principaux': 'Plats Principaux', 'desserts': 'Desserts', 
+      'plats-principaux': 'Plats Principaux', 'desserts': 'Desserts',
       'gateau-mariage': 'Gâteau de Mariage', 'boissons': 'Boissons'
     };
     return labels[key.toLowerCase()] || key.charAt(0).toUpperCase() + key.slice(1).replace(/[-_]/g, ' ');
@@ -515,7 +516,7 @@ export class ClientDashboardComponent implements OnInit {
 
   reserveItemDirectly(item: CatalogueItem) {
     if (!item || this.submitting) return;
-    
+
     this.submitting = true;
     this.cdr.detectChanges();
 
