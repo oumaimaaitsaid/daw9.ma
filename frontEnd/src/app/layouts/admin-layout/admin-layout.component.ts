@@ -2,6 +2,12 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { Store } from '@ngrx/store';
+import { NotificationActions } from '../../core/state/notifications/notification.actions';
+import { selectNotifications, selectUnreadCount } from '../../core/state/notifications/notification.selectors';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DestroyRef } from '@angular/core';
 
 @Component({
   selector: 'app-admin-layout',
@@ -159,12 +165,62 @@ import { AuthService } from '../../core/services/auth.service';
                <!-- Section Title handled by child routes if needed, or placeholder -->
             </div>
             <div class="flex items-center gap-6">
-               <button class="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-premium hover:shadow-2xl transition-all border border-primary/5 hover:border-primary/30">
-                 <span class="material-symbols-outlined text-secondary">notifications</span>
-                 <span class="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border border-white rounded-full animate-pulse"></span>
-               </button>
+               <!-- Notification Bell Luxury Section -->
+               <div class="relative">
+                 <button (click)="toggleNotifications()" 
+                         class="relative w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-premium hover:shadow-2xl transition-all border border-primary/5 hover:border-primary/30 group">
+                   <span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform">notifications</span>
+                   @if (unreadCount() > 0) {
+                     <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg animate-bounce">
+                        {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+                     </span>
+                   }
+                 </button>
+
+                 <!-- Notification Dropdown Luxury -->
+                 @if (notificationsOpen) {
+                   <div class="absolute top-16 right-0 w-96 bg-white rounded-[30px] shadow-luxury border border-primary/10 overflow-hidden reveal-up z-50">
+                      <div class="p-6 border-b border-primary/5 flex items-center justify-between bg-background-light/30">
+                         <h4 class="font-serif text-xl font-bold text-secondary italic">Notifications</h4>
+                         <button (click)="markAllAsRead()" class="text-[10px] font-black text-primary uppercase tracking-widest hover:opacity-70">Tout marquer lu</button>
+                      </div>
+
+                      <div class="max-h-[450px] overflow-y-auto scroll-hidden">
+                        @if (notifications().length === 0) {
+                          <div class="p-12 text-center">
+                             <span class="material-symbols-outlined text-4xl text-primary/20 mb-4">drafts</span>
+                             <p class="text-[11px] font-medium text-text-muted uppercase tracking-widest">Le journal est vierge</p>
+                          </div>
+                        } @else {
+                          @for (notif of notifications(); track notif.id) {
+                            <div class="p-5 border-b border-primary/5 hover:bg-background-light/50 transition-all cursor-pointer group"
+                                 [class.bg-primary/5]="!notif.isRead"
+                                 (click)="markAsRead(notif.id)">
+                               <div class="flex gap-4">
+                                  <div class="w-2 h-2 rounded-full mt-2 shrink-0 transition-all duration-500"
+                                       [class.bg-primary]="!notif.isRead"
+                                       [class.bg-text-muted/20]="notif.isRead"></div>
+                                  <div class="flex-1">
+                                     <div class="flex justify-between items-start mb-1">
+                                        <h5 class="text-sm font-bold text-secondary font-serif italic">{{ notif.titre }}</h5>
+                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter">{{ notif.createdAt | date:'HH:mm' }}</span>
+                                     </div>
+                                     <p class="text-[11px] text-text-muted leading-relaxed">{{ notif.message }}</p>
+                                  </div>
+                               </div>
+                            </div>
+                          }
+                        }
+                      </div>
+
+                      <div class="p-5 bg-background-light/30 text-center">
+                         <a routerLink="/admin/dashboard" class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] hover:text-primary transition-colors">Voir l'historique complet</a>
+                      </div>
+                   </div>
+                 }
+               </div>
             </div>
-         </header>
+          </header>
 
          <!-- Route View -->
          <div class="p-12 pb-24 flex-1">
@@ -193,17 +249,48 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class AdminLayoutComponent {
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
+  private store = inject(Store);
+  private destroyRef = inject(DestroyRef);
 
   menuOpen = false;
+  notificationsOpen = false;
   currentUser = this.authService.currentUser;
+
+  // Notification State
+  notifications = this.store.selectSignal(selectNotifications);
+  unreadCount = this.store.selectSignal(selectUnreadCount);
 
   expandedSections = {
     negafa: false,
     traiteur: false
   };
 
+  ngOnInit(): void {
+    const user = this.currentUser;
+    if (user && user.userId) {
+      // Connect WebSocket & Load initial notifications
+      this.notificationService.connectWebSocket(user.userId);
+      this.store.dispatch(NotificationActions.loadNotifications());
+    }
+  }
+
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
+    if (this.menuOpen) this.notificationsOpen = false;
+  }
+
+  toggleNotifications(): void {
+    this.notificationsOpen = !this.notificationsOpen;
+    if (this.notificationsOpen) this.menuOpen = false;
+  }
+
+  markAsRead(id: number): void {
+    this.store.dispatch(NotificationActions.markAsRead({ id }));
+  }
+
+  markAllAsRead(): void {
+    this.store.dispatch(NotificationActions.clearAllNotifications());
   }
 
   toggleSection(section: 'negafa' | 'traiteur'): void {
