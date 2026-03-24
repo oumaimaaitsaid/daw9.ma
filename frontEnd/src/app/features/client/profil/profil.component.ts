@@ -61,8 +61,8 @@ export class ClientProfilComponent implements OnInit {
   profileForm: FormGroup = this.fb.group({
     phone: ['', [Validators.required, Validators.pattern(/^(06|07|05)[0-9]{8}$/)]],
     ville: ['', Validators.required],
-    budget: [0, [Validators.required, Validators.min(1000)]],
-    dateMarriage: ['', Validators.required]
+    budget: [0, [Validators.min(1000)]],
+    dateMarriage: ['']
   });
 
   ngOnInit() {
