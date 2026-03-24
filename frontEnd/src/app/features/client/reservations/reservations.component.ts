@@ -50,12 +50,15 @@ export class ClientReservationsComponent implements OnInit {
       });
   }
 
-  findItemByCategorie(res: DemandeReservation, category: string): any {
-    if (!res.items) return null;
-    return res.items.find(item =>
-      item.categorie?.toLowerCase() === category.toLowerCase() ||
-      item.type?.toLowerCase() === category.toLowerCase()
-    );
+  getCategoryColor(categorie: string): string {
+    switch (categorie?.toUpperCase()) {
+      case 'NEGAFA': return 'bg-primary';
+      case 'TRAITEUR': return 'bg-amber-500';
+      case 'PHOTOGRAPHE': return 'bg-emerald-500';
+      case 'DJ': return 'bg-blue-500';
+      case 'ZIANA': return 'bg-pink-400';
+      default: return 'bg-secondary';
+    }
   }
 
   getStatutClass(status: string): string {
@@ -69,16 +72,10 @@ export class ClientReservationsComponent implements OnInit {
 
   getStatutLabel(status: string): string {
     switch (status) {
-      case 'CONFIRMEE': return 'Confirmée';
+      case 'CONFIRMEE': return 'Confirmée ✓';
       case 'EN_ATTENTE': return 'En attente';
       case 'ANNULEE': return 'Annulée';
       default: return status;
     }
-  }
-
-  getItemPrice(data: any): string {
-    if (!data) return '';
-    if (data.prixParPersonne) return `${data.prixParPersonne} MAD/PERS`;
-    return `${data.prix} MAD`;
   }
 }
