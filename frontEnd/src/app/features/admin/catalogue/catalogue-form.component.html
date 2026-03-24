@@ -6,7 +6,7 @@
          <div>
             <p class="subtitle-luxury mb-2">Inscription Boutique</p>
             <h2 class="title-luxury-md">
-              {{ isEdit() ? 'Modifier le Chef-d\\'œuvre' : 'Nouvelle Acquisition' }}
+              {{ isEdit() ? "Modifier le Chef-d'œuvre" : 'Nouvelle Acquisition' }}
             </h2>
          </div>
          <button (click)="onClose.emit()" class="btn-icon-close group">
@@ -136,16 +136,27 @@
                </div>
 
                <div class="flex flex-wrap gap-4">
-                  @if (currentItem().images && currentItem().images.length > 0) {
-                    @for (img of currentItem().images; track img) {
-                      <div class="relative w-32 h-32 rounded-[25px] overflow-hidden border border-primary/10 shadow-lg group/img">
-                        <img [src]="serverUrl + img" loading="lazy" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-secondary/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                           <span class="material-symbols-outlined text-white text-xl">delete</span>
-                        </div>
+                  <!-- Existing Server Images -->
+                  @for (img of currentItem().images; track img) {
+                    <div class="relative w-32 h-32 rounded-[25px] overflow-hidden border border-primary/10 shadow-lg group/img">
+                      <img [src]="serverUrl + img" loading="lazy" class="w-full h-full object-cover">
+                      <div class="absolute inset-0 bg-secondary/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                         <span class="material-symbols-outlined text-white text-xl">delete</span>
                       </div>
-                    }
-                  } @else {
+                    </div>
+                  }
+
+                  <!-- New Local Previews -->
+                  @for (preview of previews; track preview) {
+                    <div class="relative w-32 h-32 rounded-[25px] overflow-hidden border-2 border-primary/30 shadow-lg group/preview">
+                      <img [src]="preview" class="w-full h-full object-cover opacity-80">
+                      <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-primary/90 text-white text-[8px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">Nouveau</span>
+                      </div>
+                    </div>
+                  }
+
+                  @if (currentItem().images.length === 0 && previews.length === 0) {
                     <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest self-center italic">Aucune archive attachée</p>
                   }
                </div>

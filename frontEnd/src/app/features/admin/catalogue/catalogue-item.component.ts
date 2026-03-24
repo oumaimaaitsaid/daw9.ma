@@ -58,6 +58,7 @@ export class CatalogueItemComponent implements OnInit {
   isEdit = signal(false);
   saving = signal(false);
   currentItem = signal<CatalogueItem>(this.createEmptyItem());
+  confirmingDelete = signal<CatalogueItem | null>(null);
   
   files: File[] = [];
 
@@ -174,14 +175,28 @@ export class CatalogueItemComponent implements OnInit {
   }
 
   delete(item: CatalogueItem) {
-    if (!item.id || !confirm('Supprimer cet élément ?')) return;
+    this.confirmingDelete.set(item);
+  }
+
+  confirmDelete() {
+    const item = this.confirmingDelete();
+    if (!item || !item.id) return;
 
     this.catalogueService.deleteItem(this.categorie(), this.sousCategorie(), item.id).subscribe({
       next: () => {
         this.showToast('La pièce a été retirée du catalogue');
+        this.confirmingDelete.set(null);
         this.loadItems();
       },
-      error: err => this.showToast(err.message, true)
+      error: err => {
+        const errorMsg = err.error?.message || err.message || 'Une erreur est survenue lors de la suppression';
+        this.showToast(errorMsg, true);
+        this.confirmingDelete.set(null);
+      }
     });
+  }
+
+  cancelDelete() {
+    this.confirmingDelete.set(null);
   }
 }

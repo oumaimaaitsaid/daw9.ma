@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, Signal, WritableSignal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, Signal, WritableSignal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CatalogueItem } from './catalogue.models';
@@ -51,8 +51,23 @@ export class CatalogueFormComponent {
   ambianceOptions = AMBIANCE_OPTIONS;
   budgetOptions = BUDGET_OPTIONS;
   couleurOptions = COULEUR_OPTIONS;
-
+ 
   files: File[] = [];
+  previews: string[] = [];
+
+  constructor() {
+    effect(() => {
+      if (!this.showForm()) {
+        this.clearPreviews();
+      }
+    });
+  }
+
+  private clearPreviews() {
+    this.previews.forEach(p => URL.revokeObjectURL(p));
+    this.previews = [];
+    this.files = [];
+  }
 
   hasField(field: string): boolean {
     const config = FIELDS_CONFIG[this.sousCategorie()];
@@ -75,7 +90,12 @@ export class CatalogueFormComponent {
   handleFiles(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
+      this.previews.forEach(p => URL.revokeObjectURL(p));
       this.files = Array.from(input.files);
+      
+      // Générer les previews
+      this.previews = this.files.map(file => URL.createObjectURL(file));
+      
       this.onFiles.emit(this.files);
     }
   }

@@ -78,3 +78,33 @@
     </div>
   </div>
 }
+
+<!-- Custom Deletion Confirmation Overlay -->
+@if (confirmingDelete()) {
+  <div class="fixed inset-0 bg-secondary/80 backdrop-blur-sm z-[400] flex items-center justify-center p-6">
+    <div class="bg-white rounded-[40px] shadow-luxury p-10 lg:p-16 max-w-xl w-full reveal-up border border-primary/5">
+      <div class="flex items-center gap-6 mb-10 text-red-600">
+        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+          <span class="material-symbols-outlined text-4xl">warning</span>
+        </div>
+        <div>
+          <h3 class="font-serif text-2xl font-bold">Action Irréversible</h3>
+          <p class="text-[9px] font-black uppercase tracking-widest opacity-60">Protocole de Suppression</p>
+        </div>
+      </div>
+      
+      <p class="text-secondary text-lg leading-relaxed mb-12">
+        Êtes-vous certain de vouloir retirer <span class="font-bold text-primary font-serif italic">"{{ confirmingDelete()?.nom }}"</span> du registre impérial ? Cette action est définitive.
+      </p>
+
+      <div class="flex gap-4">
+        <button (click)="cancelDelete()" class="btn-luxury-secondary flex-1">
+          Annuler
+        </button>
+        <button (click)="confirmDelete()" class="btn-luxury-primary flex-1 !bg-red-600 !border-red-600 hover:!bg-red-700">
+          Supprimer Définitivement
+        </button>
+      </div>
+    </div>
+  </div>
+}
