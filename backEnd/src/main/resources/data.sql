@@ -5,8 +5,8 @@ TRUNCATE TABLE catalogue_items CASCADE;
 TRUNCATE TABLE users CASCADE;
 -- ========== ADMIN USER ==========
 -- Email: admin@admin.com / Mot de passe: admin
-INSERT INTO users (id, email, password, nom, prenom, phone, ville, role)
-VALUES (1, 'admin@admin.com', '$2a$12$yhZB8QWmnycPF9cXQwi9RObAK1AySs5JSwIauOcCa3Z9YvLUOXe.6', 'Admin', 'Daw9', '0600000000', 'Casablanca', 'ADMIN')
+INSERT INTO users (id, email, password, nom, prenom, phone, ville, role, active)
+VALUES (1, 'admin@admin.com', '$2a$12$yhZB8QWmnycPF9cXQwi9RObAK1AySs5JSwIauOcCa3Z9YvLUOXe.6', 'Admin', 'Daw9', '0600000000', 'Casablanca', 'ADMIN', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- ========== NEGAFA - CAFTAN ==========

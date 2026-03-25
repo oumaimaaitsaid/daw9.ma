@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { DemandeReservation } from '../../../core/models/reservation.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-reservations-list',
@@ -27,6 +28,7 @@ export class ReservationsListComponent implements OnInit {
   loading = signal(true);
   searchQuery = signal('');
   statusFilter = signal<string>('ALL');
+  serverUrl = environment.serverUrl;
   
   successMessage = signal('');
   errorMessage = signal('');
@@ -34,6 +36,7 @@ export class ReservationsListComponent implements OnInit {
   currentPage = signal(0);
   pageSize = signal(10);
   totalPages = signal(0);
+  selectedReservation = signal<DemandeReservation | null>(null);
 
   filteredReservations = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -41,9 +44,9 @@ export class ReservationsListComponent implements OnInit {
     
     return this.reservations().filter(res => {
       const matchesSearch = !q || 
-        res.client.nom.toLowerCase().includes(q) ||
-        res.client.prenom.toLowerCase().includes(q) ||
-        res.client.email.toLowerCase().includes(q);
+        (res.client?.nom?.toLowerCase().includes(q) || false) ||
+        (res.client?.prenom?.toLowerCase().includes(q) || false) ||
+        (res.client?.email?.toLowerCase().includes(q) || false);
         
       const matchesStatus = sf === 'ALL' || res.status === sf;
       
@@ -61,8 +64,8 @@ export class ReservationsListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
-          this.reservations.set(data.content);
-          this.totalPages.set(data.totalPages);
+          this.reservations.set(data.content || []);
+          this.totalPages.set(data.totalPages || 0);
           this.loading.set(false);
         },
         error: (err) => {
@@ -85,6 +88,14 @@ export class ReservationsListComponent implements OnInit {
 
   updateStatusFilter(status: string) {
     this.statusFilter.set(status);
+  }
+
+  openDetails(res: DemandeReservation) {
+    this.selectedReservation.set(res);
+  }
+
+  closeDetails() {
+    this.selectedReservation.set(null);
   }
 
   confirm(id: number) {
@@ -148,5 +159,12 @@ export class ReservationsListComponent implements OnInit {
       case 'ANNULEE': return 'ANNULÉE';
       default: return status;
     }
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    return this.serverUrl + normalizedPath;
   }
 }

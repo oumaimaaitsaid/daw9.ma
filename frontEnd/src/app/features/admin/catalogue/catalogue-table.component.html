@@ -39,7 +39,7 @@
               <td class="table-td-luxury">
                 <div class="image-container-luxury group-hover:scale-105 transition-transform duration-700">
                   @if (item.images && item.images.length > 0) {
-                    <img [src]="serverUrl + item.images[0]" loading="lazy"
+                    <img [src]="getImageUrl(item.images[0])" loading="lazy"
                          class="w-full h-full object-cover">
                   } @else {
                     <div class="w-full h-full bg-background-light flex items-center justify-center text-primary/20">

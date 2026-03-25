@@ -7,6 +7,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   if (authService.isLoggedIn) {
+    if (authService.isBanned && !state.url.includes('banned')) {
+       router.navigate(['/auth/banned']);
+       return false;
+    }
     return true;
   }
 
@@ -19,6 +23,10 @@ export const clientGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   if (authService.isLoggedIn && authService.userRole === 'CLIENT') {
+    if (authService.isBanned) {
+       router.navigate(['/auth/banned']);
+       return false;
+    }
     return true;
   }
 

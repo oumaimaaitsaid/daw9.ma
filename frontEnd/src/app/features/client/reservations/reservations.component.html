@@ -4,10 +4,10 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 reveal">
       <div>
-        <h1 class="font-serif text-5xl font-bold text-secondary mb-3 italic">Mes Réservations</h1>
+        <h1 class="font-serif text-5xl font-bold text-secondary mb-3 italic">Mes Commandes</h1>
         <div class="flex items-center gap-4">
           <div class="w-16 h-[1px] bg-primary"></div>
-          <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">Suivi de vos demandes exclusives
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">Suivi de vos demandes de packs royaux
           </p>
         </div>
       </div>
@@ -18,16 +18,30 @@
         </div>
         <div>
           <p class="text-[9px] font-black text-secondary uppercase tracking-widest">Dossiers Actifs</p>
-          <span class="font-serif text-xl font-bold text-primary">{{ reservations().length }} Projets</span>
+          <span class="font-serif text-xl font-bold text-primary">{{ reservations().length }} Packs</span>
         </div>
       </div>
     </div>
+
+    <!-- Feedback Messages -->
+    @if (successMessage()) {
+      <div class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center gap-3 animate-bounce">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span class="text-xs font-bold uppercase tracking-widest">{{ successMessage() }}</span>
+      </div>
+    }
+    @if (errorMessage()) {
+      <div class="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center gap-3">
+        <span class="material-symbols-outlined">error</span>
+        <span class="text-xs font-bold uppercase tracking-widest">{{ errorMessage() }}</span>
+      </div>
+    }
 
     <!-- Loading -->
     @if (loading()) {
     <div class="flex flex-col items-center justify-center py-32 reveal">
       <div class="w-16 h-16 border-2 border-primary/20 border-t-primary rounded-full animate-spin mb-6"></div>
-      <p class="text-[10px] font-bold text-primary uppercase tracking-widest">Ouverture des dossiers...</p>
+      <p class="text-[10px] font-bold text-primary uppercase tracking-widest">Ouverture de vos dossiers...</p>
     </div>
 
     <!-- Empty State -->
@@ -36,13 +50,13 @@
       <div class="w-24 h-24 bg-background rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
         <span class="material-symbols-outlined text-4xl text-primary/40">bookmark</span>
       </div>
-      <h3 class="font-serif text-3xl font-bold text-secondary mb-4">Aucune réservation</h3>
+      <h3 class="font-serif text-3xl font-bold text-secondary mb-4">Aucun pack commandé</h3>
       <p
         class="text-text-muted text-[11px] mb-10 max-w-sm mx-auto font-medium leading-relaxed uppercase tracking-widest">
-        Explorez notre catalogue et composez votre sélection sur mesure.</p>
+        Votre panier est prêt ? Finalisez votre sélection pour voir vos commandes ici.</p>
       <button routerLink="/client/dashboard"
         class="px-10 py-5 bg-secondary text-white rounded-full font-serif font-bold text-lg hover:bg-primary transition-all duration-500 shadow-2xl shadow-secondary/20">
-        Explorer la Collection
+        Composer mon Pack
       </button>
     </div>
 
@@ -54,15 +68,15 @@
         class="group bg-white rounded-[40px] border border-primary/5 shadow-premium hover:shadow-luxury transition-all duration-700 overflow-hidden reveal">
         <div class="p-10 md:p-14">
 
-          <!-- Header: Date + Status -->
-          <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
+          <!-- Header: Date + Status + Timeline -->
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
             <div class="flex items-center gap-6">
               <div
                 class="w-16 h-16 bg-background rounded-[20px] flex items-center justify-center shadow-inner shrink-0">
                 <span class="material-symbols-outlined text-2xl text-primary/60">calendar_today</span>
               </div>
               <div>
-                <p class="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-1">Réf. #DXB_{{ res.id }}</p>
+                <p class="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-1">Pack Royal #DXB_{{ res.id }}</p>
                 <h2 class="font-serif text-3xl font-bold text-secondary italic">
                   {{ res.dateEvenement ? (res.dateEvenement | date:'dd MMMM yyyy' : 'fr-MA') : 'Date à confirmer' }}
                 </h2>
@@ -72,46 +86,65 @@
                     <span class="text-[9px] font-bold text-secondary uppercase tracking-widest">{{ res.nombreInvites }}
                       Invités</span>
                   </div>
+                  @if (res.status === 'EN_ATTENTE') {
+                    <button (click)="cancelOrder(res.id)" class="text-[8px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest underline underline-offset-4 transition-colors">
+                      Annuler la commande
+                    </button>
+                  }
                 </div>
               </div>
             </div>
 
-            <!-- Status Badge -->
-            <div [class]="getStatutClass(res.status)"
-              class="px-6 py-2.5 rounded-full font-black text-[9px] uppercase tracking-[0.2em] self-start whitespace-nowrap">
-              ● {{ getStatutLabel(res.status) }}
+            <div class="w-full md:w-64">
+                <div class="status-line">
+                    <div class="progress" [style.width]="getProgressWidth(res.status)"></div>
+                    <div class="status-node" [class.active]="res.status === 'EN_ATTENTE' || res.status === 'CONFIRMEE' || res.status === 'REALISEE'">
+                        <span class="material-symbols-outlined text-[10px]">hourglass_empty</span>
+                        <div class="status-label">Attente</div>
+                    </div>
+                    <div class="status-node" [class.active]="res.status === 'CONFIRMEE' || res.status === 'REALISEE'">
+                        <span class="material-symbols-outlined text-[10px]">check</span>
+                        <div class="status-label">Confirmé</div>
+                    </div>
+                    <div class="status-node" [class.active]="res.status === 'REALISEE'">
+                        <span class="material-symbols-outlined text-[10px]">verified</span>
+                        <div class="status-label">Réalisé</div>
+                    </div>
+                </div>
             </div>
           </div>
 
-          <!-- Items List — Dynamic loop over ALL items -->
+          <!-- Items List — Itemized flow -->
           @if (res.items && res.items.length > 0) {
           <div class="mb-10">
-            <p class="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] mb-4">Articles sélectionnés</p>
-            <div class="divide-y divide-primary/5 border border-primary/5 rounded-[25px] overflow-hidden">
+            <p class="text-[9px] font-black text-text-muted uppercase tracking-[0.3em] mb-6">Composition de votre Pack Royal</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               @for (item of res.items; track item.id) {
               <div
-                class="flex items-center justify-between px-7 py-5 bg-white hover:bg-background/50 transition-colors">
-                <div class="flex items-center gap-4">
-                  <!-- Category color dot -->
-                  <div class="w-2 h-2 rounded-full" [class]="getCategoryColor(item.categorie)"></div>
+                class="flex items-center justify-between p-5 bg-background/30 rounded-3xl border border-primary/5 hover:bg-white hover:shadow-xl hover:shadow-secondary/5 transition-all duration-500">
+                <div class="flex items-center gap-5">
+                  <!-- Item Thumbnail -->
+                  <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white border border-primary/5 shadow-inner">
+                    @if (item.images && item.images.length > 0) {
+                        <img [src]="getImageUrl(item.images[0].url)" class="w-full h-full object-cover">
+                    } @else {
+                        <div class="w-full h-full flex items-center justify-center bg-background">
+                            <span class="material-symbols-outlined text-primary/20">style</span>
+                        </div>
+                    }
+                  </div>
                   <div>
-                    <p class="font-serif font-bold text-secondary text-sm">{{ item.nom }}</p>
-                    <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest mt-0.5">{{ item.categorie
-                      || item.type }}</p>
+                    <p class="font-serif font-bold text-secondary text-base leading-tight">{{ item.nom }}</p>
+                    <p class="text-[9px] font-bold text-primary uppercase tracking-[0.2em] mt-1">{{ item.categorie || item.type }}</p>
                   </div>
                 </div>
                 <div class="text-right">
-                  @if (item.prixParPersonne) {
-                  <p class="font-bold text-sm text-secondary">{{ (item.prixParPersonne * res.nombreInvites) | number }}
-                    <span class="text-xs text-text-muted">MAD</span>
+                  <p class="font-bold text-sm text-secondary">
+                    {{ (item.prixParPersonne ? (item.prixParPersonne * res.nombreInvites) : (item.prix || 0)) | number }}
+                    <span class="text-[10px] text-text-muted ml-0.5">MAD</span>
                   </p>
-                  <p class="text-[9px] text-text-muted">{{ item.prixParPersonne | number }} × {{ res.nombreInvites }}
-                    inv.</p>
-                  } @else if (item.prix) {
-                  <p class="font-bold text-sm text-secondary">{{ item.prix | number }} <span
-                      class="text-xs text-text-muted">MAD</span></p>
-                  } @else {
-                  <p class="text-[9px] text-text-muted italic">Prix sur devis</p>
+                  @if (item.prixParPersonne) {
+                    <p class="text-[8px] font-bold text-text-muted uppercase tracking-widest mt-1">Pack Perso.</p>
                   }
                 </div>
               </div>
@@ -119,16 +152,18 @@
             </div>
           </div>
           } @else {
-          <div class="mb-10 p-6 bg-background/50 rounded-[20px] border border-primary/5 text-center">
-            <p class="text-[10px] text-text-muted italic">Aucun article enregistré dans cette réservation.</p>
+          <div class="mb-10 p-10 bg-background/50 rounded-[40px] border border-primary/5 text-center border-dashed">
+            <span class="material-symbols-outlined text-4xl text-primary/10 mb-4">inventory_2</span>
+            <p class="text-[10px] text-text-muted italic uppercase tracking-widest">Informations sur les articles en cours de chargement...</p>
           </div>
           }
 
           <!-- Footer: Message + Total -->
-          <div class="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-primary/5">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-10 pt-10 border-t border-primary/5">
             @if (res.message) {
             <div
-              class="flex-1 bg-background p-5 rounded-[20px] border border-primary/5 italic text-[11px] text-text-muted leading-relaxed">
+              class="flex-1 bg-background/80 p-6 rounded-[30px] border border-primary/5 italic text-[11px] text-text-muted leading-relaxed relative">
+              <span class="absolute -top-3 left-6 px-3 bg-white text-[8px] font-black text-primary uppercase tracking-widest">Note Conciergerie</span>
               "{{ res.message }}"
             </div>
             } @else {
@@ -137,11 +172,11 @@
 
             <!-- Total -->
             <div
-              class="bg-secondary px-10 py-6 rounded-[30px] shadow-2xl shadow-secondary/10 text-center shrink-0 group-hover:scale-105 transition-transform duration-700">
-              <p class="text-[9px] text-white/40 font-black uppercase tracking-[0.3em] mb-1">Total Estimé</p>
-              <p class="font-serif text-4xl font-bold text-white">
+              class="bg-secondary px-12 py-8 rounded-[40px] shadow-2xl shadow-secondary/20 text-center shrink-0 group-hover:scale-105 transition-transform duration-700">
+              <p class="text-[10px] text-white/40 font-black uppercase tracking-[0.4em] mb-2">Total du Pack Royal</p>
+              <p class="font-serif text-4xl font-bold text-white tracking-tight">
                 {{ res.montantTotal | number }}
-                <span class="text-base font-sans text-primary ml-1">MAD</span>
+                <span class="text-lg font-sans text-primary ml-1">MAD</span>
               </p>
             </div>
           </div>
@@ -154,4 +189,3 @@
 
   </div>
 </div>
-```

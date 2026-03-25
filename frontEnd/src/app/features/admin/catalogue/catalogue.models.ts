@@ -4,6 +4,7 @@ export interface CatalogueItem {
   description: string;
   prix: number;
   images: string[];
+  categorie: string;
   sousCategorie: string;
   // Champs spécifiques selon le type
   type?: string; 

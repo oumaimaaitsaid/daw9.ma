@@ -25,4 +25,11 @@ export class CatalogueTableComponent {
   @Output() onEdit = new EventEmitter<CatalogueItem>();
   @Output() onDelete = new EventEmitter<CatalogueItem>();
   @Output() onOpenForm = new EventEmitter<void>();
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    return this.serverUrl + normalizedPath;
+  }
 }

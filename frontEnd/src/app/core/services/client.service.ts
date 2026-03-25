@@ -22,6 +22,10 @@ export class ClientService {
     return this.http.delete<void>(`${this.adminUrl}/${id}`);
   }
 
+  toggleStatus(id: number): Observable<Client> {
+    return this.http.put<Client>(`${this.adminUrl}/${id}/toggle-status`, {});
+  }
+
   // --- Client Profile Methods ---
   getProfile(): Observable<Client> {
     return this.http.get<Client>(this.clientUrl);

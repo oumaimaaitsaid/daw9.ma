@@ -5,6 +5,7 @@ export interface ReservationItem {
   prixParPersonne?: number;
   categorie: string;
   type?: string;
+  images?: any[];
 }
 
 export interface DemandeReservation {

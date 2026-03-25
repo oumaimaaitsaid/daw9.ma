@@ -11,12 +11,11 @@ import {
 } from './catalogue.constants';
 import { CatalogueTableComponent } from './catalogue-table.component';
 import { CatalogueFormComponent } from './catalogue-form.component';
-import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-catalogue-item',
   standalone: true,
-  imports: [CommonModule, FormsModule, CatalogueTableComponent, CatalogueFormComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, CatalogueTableComponent, CatalogueFormComponent],
   templateUrl: './catalogue-item.component.html',
   styles: [`
     :host { display: block; }
@@ -87,6 +86,7 @@ export class CatalogueItemComponent implements OnInit {
   createEmptyItem(): CatalogueItem {
     return {
       nom: '', description: '', prix: 0, images: [],
+      categorie: this.categorie(),
       sousCategorie: this.sousCategorie(),
       couleurs: [], tailles: [], matieres: [], styles: []
     };

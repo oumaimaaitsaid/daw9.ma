@@ -38,6 +38,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Column(columnDefinition = "boolean default true")
+    private Boolean active = true;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -55,7 +58,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return active == null || active;
     }
 
     @Override
@@ -65,6 +68,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active == null || active;
+    }
+
+    public boolean isActive() {
+        return active == null || active;
     }
 }

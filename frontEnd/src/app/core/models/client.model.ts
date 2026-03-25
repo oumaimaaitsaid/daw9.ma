@@ -8,6 +8,8 @@ export interface Client {
   budget?: number;
   dateMarriage?: string;
   createdAt?: string;
+  active?: boolean;
+  nombreInvites?: number;
 }
 
 export interface ClientProfileUpdate {

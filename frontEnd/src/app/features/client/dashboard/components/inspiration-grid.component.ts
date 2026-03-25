@@ -22,6 +22,7 @@ export class InspirationGridComponent {
   @Input() localUploads: LocalUpload[] = [];
   @Output() onZoom = new EventEmitter<MoodboardImage>();
   @Output() onDelete = new EventEmitter<number>();
+  @Input() serverUrl: string = '';
 
   getImagesByCategorie(cat: string | null): MoodboardImage[] {
     if (cat === null) return this.moodboard.filter(img => !img.categorie);

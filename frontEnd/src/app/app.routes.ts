@@ -20,6 +20,10 @@ export const routes: Routes = [
         path: 'register',
         loadComponent: () => import('./features/auth/register-client/register-client.component').then(m => m.RegisterClientComponent)
       },
+      {
+        path: 'banned',
+        loadComponent: () => import('./features/auth/banned/banned.component').then(m => m.BannedComponent)
+      },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },

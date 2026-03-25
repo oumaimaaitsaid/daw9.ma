@@ -31,9 +31,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       else if (error.status === 0) {
         toastService.error('Impossible de joindre le serveur. Vérifiez votre connexion.');
       }
-      // 403: Interdit
+      // 403: Interdit (ou compte suspendu)
       else if (error.status === 403) {
-        toastService.error('Vous n\'avez pas les permissions nécessaires.');
+        // Logique de Ban : Si le message contient "suspendu" ou si c'est une erreur de permission critique
+        const errorMsg = typeof error.error === 'string' ? error.error : JSON.stringify(error.error);
+        if (errorMsg.toLowerCase().includes('suspendu') || errorMsg.toLowerCase().includes('disabled')) {
+           authService.logout(); // On force le logout local
+           router.navigate(['/auth/banned']);
+        } else {
+           toastService.error('Vous n\'avez pas les permissions nécessaires.');
+        }
       }
       // 404: Non trouvé
       else if (error.status === 404) {

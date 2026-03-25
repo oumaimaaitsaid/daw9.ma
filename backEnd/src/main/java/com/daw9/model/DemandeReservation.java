@@ -40,6 +40,9 @@ public class DemandeReservation {
     @Column(name = "nombre_invites")
     private Integer nombreInvites;
 
+    @Column(length = 100)
+    private String ville;
+
     @Column(length = 1000)
     private String message;
 

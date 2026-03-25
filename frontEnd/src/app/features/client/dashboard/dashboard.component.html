@@ -1,3 +1,41 @@
+<!-- Premium Luxury Splash Screen -->
+@if (showSplash()) {
+<div class="fixed inset-0 z-[1000] bg-white flex flex-col items-center justify-center overflow-hidden transition-all duration-1500"
+     [class.opacity-0]="!showSplash()" [class.pointer-events-none]="!showSplash()">
+  
+  <!-- Content Container -->
+  <div class="relative flex flex-col items-center animate-splash-content">
+    <!-- Luxury Emblem (Animated 'D') -->
+    <div class="w-32 h-32 mb-10 relative flex items-center justify-center animate-luxury-zoom">
+       <span class="font-serif text-[120px] font-bold text-secondary italic opacity-20 absolute -z-10 select-none">D</span>
+       <span class="font-serif text-[50px] font-extrabold text-secondary tracking-tight">Daw9</span>
+       
+       <!-- Elegant Orbit Circle -->
+       <div class="absolute inset-0 border-[0.5px] border-primary/20 rounded-full animate-luxury-orbit"></div>
+       <div class="absolute inset-[-10px] border-[0.2px] border-primary/10 rounded-full animate-luxury-orbit-reverse"></div>
+    </div>
+    
+    <!-- Tagline with letter spacing reveal -->
+    <div class="overflow-hidden">
+       <h2 class="font-serif text-[14px] font-black text-primary uppercase tracking-[0.8em] animate-luxury-text bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          L'Art de l'Excellence
+       </h2>
+    </div>
+
+    <!-- Progress indicator (Luxury thin line) -->
+    <div class="mt-20 w-48 h-[1px] bg-primary/5 relative overflow-hidden">
+       <div class="absolute inset-y-0 left-0 bg-primary animate-luxury-progress"></div>
+    </div>
+    
+    <p class="mt-8 text-[8px] font-bold text-text-muted uppercase tracking-[0.4em] opacity-40 animate-pulse">Chargement de votre conciergerie</p>
+  </div>
+
+  <!-- Decorative Background elements -->
+  <div class="absolute top-0 right-0 w-[40vw] h-[40vw] bg-primary/2 rounded-full blur-[120px] -mr-[20vw] -mt-[20vw] animate-float"></div>
+  <div class="absolute bottom-0 left-0 w-[40vw] h-[40vw] bg-secondary/3 rounded-full blur-[120px] -ml-[20vw] -mb-[20vw] animate-float-delayed"></div>
+</div>
+}
+
 <div class="h-full flex flex-col bg-background font-sans">
   <!-- Overlay de chargement pendant l'upload -->
   @if (uploadingCount > 0) {
@@ -78,75 +116,65 @@
   <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-0 overflow-y-auto lg:overflow-hidden bg-[#FBFBF9]">
 
     <!-- Column 1: Inspirations (Moodboard) -->
-    <app-inspiration-grid [moodboard]="moodboard" [localUploads]="localUploads" (onZoom)="zoomImage($event)"
+    <app-inspiration-grid [moodboard]="moodboard" [localUploads]="localUploads" [serverUrl]="serverUrl" (onZoom)="zoomImage($event)"
       (onDelete)="deleteImage($event)">
     </app-inspiration-grid>
 
-    <!-- Column 2: Selection (Ma Sélection) -->
-    <div
-      class="border-b lg:border-b-0 lg:border-r border-primary/5 bg-white overflow-y-auto px-4 md:px-8 py-10 scroll-hidden reveal">
+    <!-- Column 2: Integrated Selection View -->
+    <div class="border-b lg:border-b-0 lg:border-r border-primary/5 bg-white overflow-y-auto px-4 md:px-8 py-10 scroll-hidden reveal">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">Sélection</h2>
+          <h2 class="font-serif text-2xl font-bold text-secondary uppercase tracking-tight">Ma Sélection</h2>
           <div class="w-8 h-[2px] bg-primary mt-1"></div>
         </div>
-        @if (hasSelection()) {
-        <span class="text-[9px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">
-          En cours de création
-        </span>
+        @if (hasDraftSelection()) {
+          <span class="text-[9px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">
+            En cours d'élaboration
+          </span>
         }
       </div>
 
-      @if (!hasSelection()) {
-      <div
-        class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-primary/10 rounded-[30px] opacity-40">
-        <div class="w-20 h-20 bg-background rounded-full flex items-center justify-center mb-6">
-          <span class="material-symbols-outlined text-3xl text-secondary/30">concierge</span>
+      @if (!hasDraftSelection()) {
+        <div class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-primary/10 rounded-[30px] opacity-40">
+          <div class="w-16 h-16 bg-background rounded-full flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-3xl text-secondary/30">concierge</span>
+          </div>
+          <p class="font-serif text-xl text-secondary mb-2 italic">Votre sélection est vide</p>
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest px-10 leading-relaxed">Ajoutez des items depuis le catalogue ou les matchs IA</p>
         </div>
-        <p class="font-serif text-xl text-secondary mb-2 italic">Votre sélection est vide</p>
-        <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest px-10 leading-relaxed">Parcourez le
-          catalogue ou utilisez l'IA pour composer votre événement</p>
-      </div>
       } @else {
-      <div class="space-y-4">
-        @for (key of getSelectionKeys(); track key) {
-        <div
-          class="group relative bg-background/50 rounded-2xl p-5 border border-primary/5 hover:bg-white hover:shadow-xl hover:shadow-secondary/5 transition-all duration-500">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-2">{{ formatSousCategorie(key)
-                }}</p>
-              <p class="font-serif text-lg font-bold text-secondary leading-tight">{{ selection[key]?.nom }}</p>
-              <p class="text-[10px] font-bold text-text-muted mt-2 uppercase tracking-widest">
-                {{ selection[key]?.prixParPersonne ? selection[key]?.prixParPersonne + ' MAD / PERS' :
-                selection[key]?.prix + ' MAD' }}
-              </p>
+        <div class="space-y-4">
+          @for (item of moodboardSelection(); track $index) {
+            <div class="group relative bg-background/50 rounded-2xl p-5 border border-primary/5 hover:bg-white hover:shadow-xl hover:shadow-secondary/5 transition-all duration-500">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-2">{{ formatSousCategorie(item.categoryKey || '') }}</p>
+                  <p class="font-serif text-lg font-bold text-secondary leading-tight">{{ item.nom }}</p>
+                  <p class="text-[10px] font-bold text-text-muted mt-2 uppercase tracking-widest">
+                    {{ item.prixParPersonne ? item.prixParPersonne + ' MAD / PERS' : item.prix + ' MAD' }}
+                  </p>
+                </div>
+                <button (click)="removeDraft($index)" class="text-text-muted hover:text-red-500 transition-colors">
+                  <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
             </div>
-            <button (click)="removeSelection(key)" class="text-text-muted hover:text-red-500 transition-colors">
-              <span class="material-symbols-outlined text-lg">close</span>
-            </button>
-          </div>
+          }
         </div>
-        }
-      </div>
 
-      <div class="mt-12 pt-8 border-t border-primary/10">
-        <div class="flex justify-between items-center mb-8">
-          <div>
-            <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em] mb-1">Estimation Totale</p>
-            <span class="font-serif text-3xl font-bold text-secondary">{{ calculateTotal() }} <span
-                class="text-lg font-sans text-primary">MAD</span></span>
+        <div class="mt-12 pt-8 border-t border-primary/10">
+          <div class="flex justify-between items-center mb-8">
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em] mb-1">Total du Pack</p>
+              <span class="font-serif text-3xl font-bold text-secondary">{{ calculateDraftTotal() }} <span class="text-lg font-sans text-primary">MAD</span></span>
+            </div>
           </div>
+          <button (click)="moveSelectionToBasket()" [disabled]="!hasDraftSelection()"
+            class="w-full bg-secondary text-white py-5 rounded-2xl font-serif font-bold text-lg hover:bg-primary transition-all duration-500 shadow-2xl shadow-secondary/10 hover:shadow-primary/20 disabled:opacity-30 flex items-center justify-center gap-3 group">
+            <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">auto_awesome</span>
+            Réserver l'Expérience
+          </button>
         </div>
-        <button (click)="openReservationModal()" [disabled]="!hasSelection()"
-          class="w-full bg-secondary text-white py-5 rounded-2xl font-serif font-bold text-lg hover:bg-primary transition-all duration-500 shadow-2xl shadow-secondary/10 hover:shadow-primary/20 disabled:opacity-30 flex items-center justify-center gap-3 group">
-          <span
-            class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">workspace_premium</span>
-          Réserver l'Expérience
-        </button>
-        <p class="text-center text-[9px] text-text-muted uppercase tracking-widest mt-6 italic">Devis provisoire soumis
-          Ã  validation concierge</p>
-      </div>
       }
     </div>
 
@@ -192,7 +220,7 @@
           <div class="flex gap-5 items-center">
             <div class="w-20 h-20 rounded-2xl overflow-hidden shadow-inner flex-shrink-0">
               @if (item.images && item.images.length > 0) {
-              <img [src]="'http://localhost:8080' + item.images[0]" loading="lazy"
+              <img [src]="getImageUrl(item.images[0])" loading="lazy"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
               } @else {
               <div
@@ -338,27 +366,38 @@
         description="Veuillez sélectionner une catégorie dans le menu de gauche pour découvrir nos pièces d'exception.">
       </app-empty-state>
       } @else {
-      <div class="mb-12 reveal">
-        <h2 class="font-serif text-4xl font-bold text-secondary flex items-baseline gap-4">
-          {{ getCategorieLabel(selectedCategorie) }}
-          <span class="text-primary text-xl font-normal italic font-sans" *ngIf="selectedSousCategorie">
-            {{ getSousCategorieLabel(selectedSousCategorie) }}
-          </span>
-        </h2>
-        <div class="flex items-center gap-4 mt-2">
-          <div class="w-12 h-[1px] bg-primary"></div>
-          <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">{{ catalogueItems.length }} pièces
-            disponibles</p>
+      <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 reveal">
+        <div>
+          <h2 class="font-serif text-4xl font-bold text-secondary flex items-baseline gap-4">
+            {{ getCategorieLabel(selectedCategorie) }}
+            <span class="text-primary text-xl font-normal italic font-sans" *ngIf="selectedSousCategorie">
+              {{ getSousCategorieLabel(selectedSousCategorie) }}
+            </span>
+          </h2>
+          <div class="flex items-center gap-4 mt-2">
+            <div class="w-12 h-[1px] bg-primary"></div>
+            <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">{{ getSortedCatalogueItems().length }} pièces disponibles</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-primary/5 shadow-sm">
+          <span class="text-[9px] font-black text-text-muted uppercase tracking-[0.3em]">Trier par</span>
+          <select (change)="setSort($any($event.target).value)" 
+            class="bg-transparent text-[10px] font-bold text-secondary uppercase tracking-widest outline-none cursor-pointer">
+            <option value="none">Par défaut</option>
+            <option value="asc">Prix : Croissant</option>
+            <option value="desc">Prix : Décroissant</option>
+          </select>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        @for (item of catalogueItems; track item.id) {
+        @for (item of getSortedCatalogueItems(); track item.id) {
         <div
           class="group bg-white rounded-[40px] shadow-premium hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-700 reveal p-3 border border-primary/5">
           <div class="relative aspect-[4/5] rounded-[32px] overflow-hidden mb-6">
             @if (item.images && item.images.length > 0) {
-            <img [src]="'http://localhost:8080' + item.images[0]" loading="lazy"
+            <img [src]="getImageUrl(item.images[0])" loading="lazy"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 cursor-pointer"
               (click)="zoomCatalogueItem(item)">
             } @else {
@@ -371,8 +410,8 @@
 
             <button (click)="reserveItemDirectly(item)" [disabled]="submitting"
               class="absolute bottom-6 right-6 px-6 py-3 bg-white text-secondary rounded-full flex items-center justify-center gap-2 shadow-2xl hover:bg-primary hover:text-white transition-all duration-500 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 scale-90 hover:scale-100 disabled:opacity-50">
-              <span class="material-symbols-outlined text-sm">event_available</span>
-              <span class="text-[10px] font-bold uppercase tracking-widest">{{ submitting ? 'Chargement...' : 'Réserver'
+              <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest">{{ submitting ? 'Chargement...' : 'Choisir'
                 }}</span>
             </button>
           </div>
@@ -427,16 +466,16 @@
     <!-- Recap Selection Luxury -->
     <div class="grid grid-cols-2 gap-8 mb-12">
       <div class="bg-[#FBFBF9] rounded-[32px] p-8 border border-primary/5">
-        <p class="text-[9px] font-black text-secondary uppercase tracking-widest mb-6">Votre Collection Sélectionnée</p>
+        <p class="text-[9px] font-black text-secondary uppercase tracking-widest mb-6">Récapitulatif de votre Pack</p>
         <div class="space-y-4 max-h-[200px] overflow-y-auto pr-4 scroll-hidden">
-          @for (key of getSelectionKeys(); track key) {
+          @for (item of basketService.items(); track $index) {
           <div class="flex justify-between items-center border-b border-primary/5 pb-3">
             <div>
-              <p class="text-[8px] font-bold text-primary uppercase tracking-tighter">{{ formatSousCategorie(key) }}</p>
-              <p class="font-serif text-sm font-bold text-secondary">{{ selection[key]?.nom }}</p>
+              <p class="text-[8px] font-bold text-primary uppercase tracking-tighter">{{ formatSousCategorie(item.categoryKey || '') }}</p>
+              <p class="font-serif text-sm font-bold text-secondary">{{ item.nom }}</p>
             </div>
-            <span class="text-[9px] font-bold text-text-muted italic">{{ selection[key]?.prixParPersonne ?
-              selection[key]?.prixParPersonne + ' MAD/PERS' : selection[key]?.prix + ' MAD' }}</span>
+            <span class="text-[9px] font-bold text-text-muted italic">{{ item.prixParPersonne ?
+              item.prixParPersonne + ' MAD/PERS' : item.prix + ' MAD' }}</span>
           </div>
           }
         </div>
@@ -472,6 +511,17 @@
                 placeholder="Ex: 150">
             </div>
           </div>
+          <!-- Ville -->
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-secondary/60 uppercase tracking-[0.2em] ml-1">Ville de l'événement</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-primary text-xl pointer-events-none">location_on</span>
+              <input type="text" formControlName="ville"
+                class="w-full pl-14 pr-6 py-4 bg-[#FBFBF9] border border-primary/10 rounded-2xl focus:bg-white focus:ring-1 focus:ring-primary/30 transition-all text-sm outline-none"
+                placeholder="Ex: Casablanca, Marrakech..."
+                [class.border-red-400]="reservationForm.get('ville')?.touched && reservationForm.get('ville')?.invalid">
+            </div>
+          </div>
           <!-- Message -->
           <div class="space-y-2">
             <label class="block text-[10px] font-bold text-secondary/60 uppercase tracking-[0.2em] ml-1">Souhaits
@@ -497,7 +547,7 @@
       </div>
       <button (click)="submitReservation()" [disabled]="submitting"
         class="px-8 py-3 bg-primary text-white rounded-full font-serif font-bold text-base hover:bg-white hover:text-secondary transition-all duration-500 disabled:opacity-30">
-        {{ submitting ? 'Transmission...' : 'Confirmer la Demande' }}
+        {{ submitting ? 'Transmission...' : 'Finaliser la Commande' }}
       </button>
     </div>
 
@@ -527,7 +577,7 @@
     <button (click)="closeZoom()" class="absolute -top-16 right-0 text-white/50 hover:text-white transition-all">
       <span class="material-symbols-outlined text-4xl">close</span>
     </button>
-    <img [src]="'http://localhost:8080' + zoomedImage.imageUrl" loading="lazy"
+    <img [src]="getImageUrl(zoomedImage.imageUrl)" loading="lazy"
       class="max-w-full max-h-[85vh] object-contain rounded-[40px] shadow-luxury border-4 border-white/5">
     <div class="absolute -bottom-16 left-0 right-0 text-center">
       <p class="font-serif text-2xl font-bold text-white mb-1">{{ formatSousCategorie(zoomedImage.sousCategorie || '')
@@ -538,3 +588,99 @@
   </div>
 </div>
 }
+
+<!-- Floating Panier d'Excellence Toggle -->
+<div class="fixed bottom-12 right-12 z-[150] flex flex-col items-end gap-4 reveal-up">
+  @if (hasSelection() && !showCartDrawer) {
+    <div class="bg-white/80 backdrop-blur-md px-6 py-3 rounded-full shadow-luxury border border-primary/10 mb-2 animate-bounce flex items-center gap-3">
+      <p class="text-[10px] font-black text-secondary uppercase tracking-widest">Votre Pack est prêt</p>
+      <div class="w-2 h-2 rounded-full bg-primary"></div>
+    </div>
+  }
+  
+  <button (click)="toggleCartDrawer()" 
+    class="w-20 h-20 bg-secondary text-white rounded-full flex items-center justify-center shadow-luxury hover:bg-primary transition-all duration-700 group relative">
+    <span class="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">shopping_bag</span>
+    @if (basketService.itemCount() > 0) {
+      <span class="absolute -top-1 -right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-[12px] font-black border-4 border-background animate-scale">
+        {{ basketService.itemCount() }}
+      </span>
+    }
+  </button>
+</div>
+
+<!-- Floating Cart Drawer Overlay -->
+@if (showCartDrawer) {
+  <div class="fixed inset-0 bg-secondary/40 backdrop-blur-sm z-[200] transition-all duration-700" (click)="toggleCartDrawer()">
+    <div class="absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-luxury flex flex-col reveal-left p-0" (click)="$event.stopPropagation()">
+      
+      <!-- Drawer Header -->
+      <div class="p-10 border-b border-primary/5 flex justify-between items-center bg-[#FBFBF9]">
+        <div>
+          <h2 class="font-serif text-3xl font-bold text-secondary italic">Mon Panier</h2>
+          <p class="text-[9px] font-black text-primary uppercase tracking-[0.4em] mt-1">Édition de votre Pack</p>
+        </div>
+        <button (click)="toggleCartDrawer()" class="w-12 h-12 rounded-full bg-white border border-primary/5 flex items-center justify-center text-text-muted hover:text-secondary transition-all">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Content -->
+      <div class="flex-1 overflow-y-auto px-10 py-12 scroll-hidden bg-white selection:bg-primary/10">
+        @if (!hasSelection()) {
+          <div class="flex flex-col items-center justify-center h-full text-center opacity-40">
+            <div class="w-24 h-24 bg-background rounded-full flex items-center justify-center mb-8">
+              <span class="material-symbols-outlined text-4xl text-secondary/30">concierge</span>
+            </div>
+            <p class="font-serif text-2xl text-secondary mb-3 italic">Votre panier est vide</p>
+            <p class="text-[11px] font-bold text-text-muted uppercase tracking-widest px-10 leading-relaxed">Parcourez le catalogue pour composer votre événement d'exception</p>
+          </div>
+        } @else {
+          <div class="space-y-6">
+            @for (item of basketService.items(); track $index) {
+              <div class="group relative bg-[#FBFBF9] rounded-3xl p-6 border border-primary/5 hover:bg-white hover:shadow-2xl transition-all duration-700">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-2">{{ formatSousCategorie(item.categoryKey || '') }}</p>
+                    <h3 class="font-serif text-xl font-bold text-secondary leading-tight mb-2 uppercase italic">{{ item.nom }}</h3>
+                    <div class="flex items-center gap-3">
+                      <span class="text-[10px] font-black text-text-muted uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-primary/5">
+                        {{ item.prixParPersonne ? item.prixParPersonne + ' MAD / PERS' : item.prix + ' MAD' }}
+                      </span>
+                    </div>
+                  </div>
+                  <button (click)="removeSelection($index)" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-text-muted hover:text-red-500 hover:shadow-lg transition-all">
+                    <span class="material-symbols-outlined text-lg">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Drawer Footer -->
+      @if (hasSelection()) {
+        <div class="p-10 bg-[#FBFBF9] border-t border-primary/5">
+          <div class="flex justify-between items-center mb-10">
+            <div>
+              <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] mb-2">Estimation Totale</p>
+              <p class="font-serif text-4xl font-bold text-secondary">{{ calculateTotal() }} <span class="text-base font-sans text-primary">MAD</span></p>
+            </div>
+            <div class="text-right">
+               <p class="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-4 py-2 rounded-full border border-primary/10 italic">Devis Provisoire</p>
+            </div>
+          </div>
+          
+          <button (click)="openReservationModal(); toggleCartDrawer()"
+            class="w-full bg-secondary text-white py-6 rounded-[30px] font-serif font-bold text-xl hover:bg-primary transition-all duration-700 shadow-luxury flex items-center justify-center gap-4 group">
+            <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">workspace_premium</span>
+            Commander mon Pack Royal
+          </button>
+          
+          <p class="text-center text-[9px] text-text-muted uppercase tracking-[0.2em] mt-8 italic opacity-60">Validation concierge sous 24 heures</p>
+        </div>
+      }
+    </div>
+  </div>
+}

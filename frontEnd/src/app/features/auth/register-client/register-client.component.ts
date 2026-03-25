@@ -110,9 +110,6 @@ import { AuthService } from '../../../core/services/auth.service';
                 }
               </div>
             </div>
-
-
-
             <!-- Error Message -->
             @if (error) {
               <div class="mb-10 p-5 bg-red-50 border border-red-100 rounded-2xl">

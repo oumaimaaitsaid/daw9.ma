@@ -38,4 +38,8 @@ export class ReservationService {
   createReservation(data: Partial<DemandeReservation>): Observable<DemandeReservation> {
     return this.http.post<DemandeReservation>(this.clientUrl, data);
   }
+
+  cancelClientReservation(id: number): Observable<void> {
+    return this.http.put<void>(`${this.clientUrl}/${id}/cancel`, {});
+  }
 }

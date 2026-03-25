@@ -118,4 +118,11 @@ export class CatalogueFormComponent {
 
     this.onSave.emit({ item, files: this.files });
   }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    return this.serverUrl + normalizedPath;
+  }
 }

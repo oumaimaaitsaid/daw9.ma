@@ -84,4 +84,20 @@ export class ClientsListComponent implements OnInit {
         });
     }
   }
+
+  toggleBan(client: Client) {
+    const action = client.active ? 'bannir' : 'réactiver';
+    if (confirm(`Voulez-vous ${action} ${client.prenom} ${client.nom} ?`)) {
+        this.clientService.toggleStatus(client.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (updated) => {
+                    const statusText = updated.active ? 'réactivé' : 'banni';
+                    this.toastService.success(`Client ${updated.prenom} ${statusText} avec succès.`);
+                    this.refresh();
+                },
+                error: (err) => this.toastService.error('Erreur: ' + (err.error?.message || err.message))
+            });
+    }
+  }
 }

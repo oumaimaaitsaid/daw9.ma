@@ -139,7 +139,7 @@
                   <!-- Existing Server Images -->
                   @for (img of currentItem().images; track img) {
                     <div class="relative w-32 h-32 rounded-[25px] overflow-hidden border border-primary/10 shadow-lg group/img">
-                      <img [src]="serverUrl + img" loading="lazy" class="w-full h-full object-cover">
+                      <img [src]="getImageUrl(img)" loading="lazy" class="w-full h-full object-cover">
                       <div class="absolute inset-0 bg-secondary/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                          <span class="material-symbols-outlined text-white text-xl">delete</span>
                       </div>

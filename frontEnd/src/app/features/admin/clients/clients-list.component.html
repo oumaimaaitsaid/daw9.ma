@@ -69,7 +69,13 @@
                     </div>
                     <div>
                       <p class="font-serif text-lg font-bold text-secondary italic leading-none mb-2 uppercase">{{ client.prenom }} {{ client.nom }}</p>
-                      <p class="text-[8px] text-primary font-black tracking-[0.2em] uppercase">Client Gradé</p>
+                      <div class="flex items-center gap-2">
+                        <p class="text-[8px] text-primary font-black tracking-[0.2em] uppercase">Client Gradé</p>
+                        @if (client.active === false) {
+                          <span class="w-1 h-1 rounded-full bg-red-500 animate-pulse"></span>
+                          <span class="text-[7px] font-bold text-red-500 uppercase tracking-widest">Compte Suspendu</span>
+                        }
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -97,12 +103,21 @@
                   </div>
                 </td>
 
-                <td class="table-td-luxury text-right">
-                   <button (click)="deleteClient(client)" 
-                           class="btn-action-icon hover:bg-red-500 text-red-600 hover:text-white translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 duration-700">
-                      <span class="material-symbols-outlined text-lg">person_remove</span>
-                   </button>
-                </td>
+                 <td class="table-td-luxury text-right">
+                   <div class="flex items-center justify-end gap-2 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 duration-700">
+                     <button (click)="toggleBan(client)" 
+                             class="btn-action-icon transition-colors"
+                             [class]="client.active ? 'text-orange-500 hover:bg-orange-500 hover:text-white' : 'text-green-500 hover:bg-green-500 hover:text-white'"
+                             [title]="client.active ? 'Bannir' : 'Réactiver'">
+                        <span class="material-symbols-outlined text-lg">{{ client.active ? 'person_off' : 'verified_user' }}</span>
+                     </button>
+                     <button (click)="deleteClient(client)" 
+                             class="btn-action-icon hover:bg-red-500 text-red-600 hover:text-white"
+                             title="Supprimer">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                     </button>
+                   </div>
+                 </td>
               </tr>
             }
           </tbody>

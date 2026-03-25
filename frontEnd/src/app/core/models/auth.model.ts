@@ -11,6 +11,7 @@ export interface AuthResponse {
   email: string;
   nom: string;
   prenom: string;
+  active: boolean;
 }
 
 export interface RegisterClientRequest {

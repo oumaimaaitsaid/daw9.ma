@@ -48,7 +48,8 @@ public class AuthServiceImpl implements AuthService {
                 user.getId(),
                 user.getEmail(),
                 user.getNom(),
-                user.getPrenom()
+                user.getPrenom(),
+                user.isActive()
         );
     }
 
@@ -82,7 +83,8 @@ public class AuthServiceImpl implements AuthService {
                 client.getId(),
                 client.getEmail(),
                 client.getNom(),
-                client.getPrenom()
+                client.getPrenom(),
+                client.isActive()
         );
     }
 }

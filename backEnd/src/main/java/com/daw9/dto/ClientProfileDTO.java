@@ -12,7 +12,9 @@ public record ClientProfileDTO(
     String phone,
     String ville,
     BigDecimal budget,
-    LocalDate dateMarriage
+    LocalDate dateMarriage,
+    Integer nombreInvites,
+    boolean active
 ) {
     public static ClientProfileDTO fromEntity(Client client) {
         return new ClientProfileDTO(
@@ -23,7 +25,9 @@ public record ClientProfileDTO(
             client.getPhone(),
             client.getVille(),
             client.getBudget(),
-            client.getDateMarriage()
+            client.getDateMarriage(),
+            client.getReservations().stream().findFirst().map(r -> r.getNombreInvites()).orElse(null), // Actually usually we'd have this in the profile
+            client.isActive()
         );
     }
 }

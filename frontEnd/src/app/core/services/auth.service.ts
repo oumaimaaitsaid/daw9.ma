@@ -40,6 +40,10 @@ export class AuthService {
     return this.currentUser?.role || null;
   }
 
+  get isBanned(): boolean {
+    return this.userRole === 'CLIENT' && this.currentUser?.active === false;
+  }
+
   login(credentials: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
       .pipe(
