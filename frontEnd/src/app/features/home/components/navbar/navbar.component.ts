@@ -6,20 +6,20 @@ import { NotificationActions } from '../../../../core/state/notifications/notifi
 import { selectUnreadCount, selectNotifications } from '../../../../core/state/notifications/notification.selectors';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { LogoComponent } from '../../../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LogoComponent],
   template: `
     <nav class="sticky top-0 z-[100] bg-white/90 backdrop-blur-md border-b border-black/5">
       <div class="max-w-7xl mx-auto px-6 lg:px-12">
         <div class="flex justify-between items-center h-16 lg:h-[72px]">
           
           <!-- Logo Section -->
-          <a routerLink="/" class="flex flex-col no-underline group">
-            <span class="text-xl font-bold text-[#1a1a1a] leading-none group-hover:text-primary transition-colors">Daw9.ma</span>
-            <span class="text-[10px] text-[#717171] font-medium mt-1 tracking-wide uppercase">Daw9ek howa kolchi</span>
+          <a routerLink="/" class="flex items-center no-underline group">
+            <app-logo [size]="45"></app-logo>
           </a>
 
           <!-- Desktop Navigation -->

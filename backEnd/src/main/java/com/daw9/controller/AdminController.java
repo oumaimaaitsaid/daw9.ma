@@ -8,7 +8,6 @@ import com.daw9.model.Notification;
 import com.daw9.repository.ClientRepository;
 import com.daw9.repository.DemandeReservationRepository;
 import com.daw9.repository.CatalogueItemRepository;
-import com.daw9.model.enums.NotificationType;
 import com.daw9.service.NotificationService;
 import com.daw9.service.DemandeReservationService;
 import com.daw9.dto.ReservationResponseDTO;

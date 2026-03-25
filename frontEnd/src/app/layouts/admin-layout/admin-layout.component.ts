@@ -8,11 +8,12 @@ import { NotificationActions } from '../../core/state/notifications/notification
 import { selectNotifications, selectUnreadCount } from '../../core/state/notifications/notification.selectors';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LogoComponent],
   template: `
     <div class="min-h-screen bg-[#FBFBF9] font-sans flex text-secondary font-medium">
       <!-- Luxury Dark Sidebar -->
@@ -20,9 +21,8 @@ import { DestroyRef } from '@angular/core';
         
         <!-- Logo Area -->
         <div class="h-24 flex items-center px-8 bg-black/20 border-b border-[#D4AF37]/10">
-          <a routerLink="/admin/dashboard" class="flex flex-col">
-             <span class="font-serif text-3xl font-bold text-white tracking-tight">Daw9.ma</span>
-             <span class="text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.4em] mt-1">Console Royale</span>
+          <a routerLink="/admin/dashboard" class="flex items-center">
+             <app-logo [size]="50" variant="dark"></app-logo>
           </a>
         </div>
 
