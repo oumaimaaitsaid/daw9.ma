@@ -8,7 +8,10 @@ import com.daw9.model.Notification;
 import com.daw9.repository.ClientRepository;
 import com.daw9.repository.DemandeReservationRepository;
 import com.daw9.repository.CatalogueItemRepository;
+import com.daw9.model.enums.NotificationType;
 import com.daw9.service.NotificationService;
+import com.daw9.service.DemandeReservationService;
+import com.daw9.dto.ReservationResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +33,7 @@ public class AdminController {
     private final DemandeReservationRepository demandeReservationRepository;
     private final CatalogueItemRepository catalogueItemRepository;
     private final NotificationService notificationService;
+    private final DemandeReservationService demandeReservationService;
 
     // Dashboard stats
     @GetMapping("/stats")
@@ -68,13 +72,34 @@ public class AdminController {
         return ResponseEntity.notFound().build();
     }
 
+    @PutMapping("/clients/{id}/toggle-status")
+    public ResponseEntity<Client> toggleClientStatus(@PathVariable("id") Long id) {
+        return clientRepository.findById(id)
+                .map(client -> {
+                    client.setActive(!client.isActive());
+                    Client saved = clientRepository.save(client);
+
+                    String statusText = saved.isActive() ? "RÉACTIVÉ" : "SUSPENDU";
+                    notificationService.createNotification(
+                            "🔒 Alerte Sécurité",
+                            "Le compte de " + saved.getPrenom() + " " + saved.getNom() + " a été " + statusText
+                                    + " par un administrateur.",
+                            1L,
+                            NotificationType.STATUS_CHANGE);
+
+                    log.info("Client {} status set to active={}", id, saved.isActive());
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // Reservations (demandes)
     @GetMapping("/reservations")
-    public ResponseEntity<Page<DemandeReservation>> getAllReservations(
+    public ResponseEntity<Page<ReservationResponseDTO>> getAllReservations(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(demandeReservationRepository.findAll(pageable));
+        return ResponseEntity.ok(demandeReservationService.getAllReservations(pageable));
     }
 
     @GetMapping("/reservations/stats")

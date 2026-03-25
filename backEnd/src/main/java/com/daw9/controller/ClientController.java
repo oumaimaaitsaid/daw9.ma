@@ -1,12 +1,16 @@
 package com.daw9.controller;
 
 import com.daw9.dto.ClientProfileDTO;
+import com.daw9.dto.ReservationResponseDTO;
 import com.daw9.model.*;
 import com.daw9.repository.*;
 import com.daw9.service.FileStorageService;
 import com.daw9.service.MoodboardProcessingService;
 import com.daw9.service.CatalogueMatchingService;
 import com.daw9.service.CatalogueService;
+import com.daw9.service.DemandeReservationService;
+import com.daw9.service.NotificationService;
+import com.daw9.model.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -45,6 +49,8 @@ public class ClientController {
     private final MoodboardProcessingService processingService;
     private final CatalogueMatchingService catalogueMatchingService;
     private final CatalogueService catalogueService;
+    private final DemandeReservationService demandeReservationService;
+    private final NotificationService notificationService;
 
     @Operation(summary = "Récupérer le profil client", description = "Retourne les informations du client connecté à partir du token JWT")
     @GetMapping("/profile")
@@ -153,7 +159,8 @@ public class ClientController {
 
     @GetMapping("/catalogue/{categorie}/{sousCategorie}")
     public ResponseEntity<Page<CatalogueItem>> getCatalogueBySousCategorie(
-            @PathVariable("categorie") String categorie, @PathVariable("sousCategorie") String sousCategorie, Pageable pageable) {
+            @PathVariable("categorie") String categorie, @PathVariable("sousCategorie") String sousCategorie,
+            Pageable pageable) {
         return ResponseEntity.ok(catalogueService.findByCategorieAndSousCategorie(categorie, sousCategorie, pageable));
     }
 
@@ -172,6 +179,7 @@ public class ClientController {
         demande.setDateEvenement(request.dateEvenement());
         demande.setNombreInvites(request.nombreInvites());
         demande.setMessage(request.message());
+        demande.setVille(request.ville());
 
         BigDecimal total = BigDecimal.ZERO;
         List<CatalogueItem> items = new ArrayList<>();
@@ -195,15 +203,25 @@ public class ClientController {
 
         DemandeReservation saved = demandeReservationRepository.save(demande);
         log.info("Reservation {} créée pour client {} ({} articles)", saved.getId(), client.getId(), items.size());
+
+        String clientName = (client.getPrenom() != null ? client.getPrenom() : "") + " " +
+                (client.getNom() != null ? client.getNom() : "");
+        notificationService.createNotification(
+                "✨ Nouvelle Réservation",
+                "Le client " + clientName.trim() + " a créé une nouvelle demande de réservation (#" + saved.getId()
+                        + ").",
+                1L,
+                NotificationType.NOUVELLE_RESERVATION);
+
         return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<Page<DemandeReservation>> getMyReservations(
+    public ResponseEntity<Page<ReservationResponseDTO>> getMyReservations(
             @AuthenticationPrincipal UserDetails userDetails,
             Pageable pageable) {
         Client client = getClient(userDetails);
-        return ResponseEntity.ok(demandeReservationRepository.findByClientId(client.getId(), pageable));
+        return ResponseEntity.ok(demandeReservationService.getClientReservations(client.getId(), pageable));
     }
 
     private Client getClient(UserDetails userDetails) {
@@ -234,6 +252,7 @@ public class ClientController {
             List<Long> itemIds,
             @NotNull(message = "La date d'événement est obligatoire") LocalDate dateEvenement,
             @NotNull(message = "Le nombre d'invités est obligatoire") Integer nombreInvites,
+            String ville,
             String message) {
     }
 }

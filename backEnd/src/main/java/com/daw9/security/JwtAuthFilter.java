@@ -26,8 +26,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
 
@@ -44,24 +44,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.info("[JWT Filter] Extracted email: {}", userEmail);
         } catch (Exception e) {
             log.error("[JWT Filter] Error extracting email: {}", e.getMessage());
-            // Token invalide, on continue sans authentification
+
             filterChain.doFilter(request, response);
             return;
         }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            log.info("[JWT Filter] Loading user details for: {}", userEmail);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             if (tokenService.validateToken(jwt, userDetails)) {
-                log.info("[JWT Filter] Token validated for: {}", userEmail);
-                log.info("[JWT Filter] User authorities: {}", userDetails.getAuthorities());
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                if (!userDetails.isEnabled()) {
+                    log.warn("[JWT Filter] Account disabled for: {}", userEmail);
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("Compte suspendu. Veuillez contacter l'administration.");
+                    return;
+                }
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

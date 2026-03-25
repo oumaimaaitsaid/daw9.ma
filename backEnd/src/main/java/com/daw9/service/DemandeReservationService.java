@@ -5,13 +5,16 @@ import com.daw9.model.CatalogueItem;
 import com.daw9.model.DemandeReservation;
 import com.daw9.repository.DemandeReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,41 +22,62 @@ public class DemandeReservationService {
 
     private final DemandeReservationRepository reservationRepository;
 
-    public List<ReservationResponseDTO> getClientReservations(Long clientId) {
-        List<DemandeReservation> reservations = reservationRepository.findByClientId(clientId);
+    @Transactional(readOnly = true)
+    public Page<ReservationResponseDTO> getClientReservations(Long clientId, Pageable pageable) {
+        Page<DemandeReservation> reservations = reservationRepository.findByClientId(clientId, pageable);
+        return reservations.map(this::convertToDTO);
+    }
 
-        return reservations.stream().map(res -> {
-            ReservationResponseDTO dto = new ReservationResponseDTO();
-            dto.setId(res.getId());
-            dto.setDateEvenement(res.getDateEvenement());
-            dto.setNombreInvites(res.getNombreInvites());
-            dto.setMontantTotal(res.getMontantTotal() != null ? res.getMontantTotal() : BigDecimal.ZERO);
-            dto.setStatus(res.getStatus().name());
-            dto.setMessage(res.getMessage());
+    @Transactional(readOnly = true)
+    public Page<ReservationResponseDTO> getAllReservations(Pageable pageable) {
+        Page<DemandeReservation> reservations = reservationRepository.findAll(pageable);
+        return reservations.map(this::convertToDTO);
+    }
 
-            if (res.getItems() != null) {
-                for (CatalogueItem item : res.getItems()) {
-                    Map<String, Object> itemMap = new HashMap<>();
-                    itemMap.put("id", item.getId());
-                    itemMap.put("nom", item.getNom());
-                    itemMap.put("prix", item.getPrix() != null ? item.getPrix() : BigDecimal.ZERO);
-                    itemMap.put("prixParPersonne", item.getPrixParPersonne() != null ? item.getPrixParPersonne() : BigDecimal.ZERO);
-                    
-                    // Convertir en String et minuscule pour matcher la DB (ziana, negafa, etc.)
-                    String cat = (item.getCategorie() != null) ? String.valueOf(item.getCategorie()).toLowerCase() : ""; 
+    private ReservationResponseDTO convertToDTO(DemandeReservation reservation) {
+        ReservationResponseDTO dto = new ReservationResponseDTO();
+        dto.setId(reservation.getId());
+        dto.setDateEvenement(reservation.getDateEvenement());
+        dto.setNombreInvites(reservation.getNombreInvites());
+        dto.setMontantTotal(reservation.getMontantTotal());
+        dto.setStatus(reservation.getStatus().name());
+        dto.setVille(reservation.getVille());
+        dto.setMessage(reservation.getMessage());
 
-                    // Check avec les noms réels trouvés dans ta base de données
-                    if (cat.contains("negafa") || cat.contains("ziana")) {
-                        dto.setNegafa(itemMap);
-                    } else if (cat.contains("traiteur")) {
-                        dto.setTraiteur(itemMap);
-                    } else if (cat.contains("photographe")) {
-                        dto.setPhotographe(itemMap);
+        if (reservation.getClient() != null) {
+            dto.setClient(Map.of(
+                    "id", reservation.getClient().getId(),
+                    "prenom", reservation.getClient().getPrenom() != null ? reservation.getClient().getPrenom() : "",
+                    "nom", reservation.getClient().getNom() != null ? reservation.getClient().getNom() : "",
+                    "email", reservation.getClient().getEmail() != null ? reservation.getClient().getEmail() : ""));
+        }
+
+        List<Map<String, Object>> itemsList = new ArrayList<>();
+        if (reservation.getItems() != null) {
+            for (CatalogueItem item : reservation.getItems()) {
+                Map<String, Object> itemMap = new HashMap<>();
+                itemMap.put("id", item.getId());
+                itemMap.put("nom", item.getNom());
+                itemMap.put("prix", item.getPrix() != null ? item.getPrix() : BigDecimal.ZERO);
+                itemMap.put("prixParPersonne",
+                        item.getPrixParPersonne() != null ? item.getPrixParPersonne() : BigDecimal.ZERO);
+                itemMap.put("categorie", item.getCategorie());
+                itemMap.put("type", item.getType());
+
+                List<Map<String, String>> imageMaps = new ArrayList<>();
+                if (item.getImages() != null) {
+                    for (String img : item.getImages()) {
+                        Map<String, String> imgMap = new HashMap<>();
+                        imgMap.put("url", img);
+                        imageMaps.add(imgMap);
                     }
-                    // Tu peux ajouter le DJ ici si tu as le champ dans ton DTO
                 }
+                itemMap.put("images", imageMaps);
+
+                itemsList.add(itemMap);
             }
-            return dto;
-        }).collect(Collectors.toList());
+        }
+        dto.setItems(itemsList);
+        return dto;
     }
 }

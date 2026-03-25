@@ -25,7 +25,8 @@ public class MoodboardProcessingService {
     @Async
     public void analyzeAsync(Long imageId, byte[] imageData, Long clientId) {
         MoodboardImage img = moodboardImageRepository.findById(imageId).orElse(null);
-        if (img == null) return;
+        if (img == null)
+            return;
 
         try {
             var classification = imageAnalysisService.classifyImage(imageData);
@@ -33,7 +34,6 @@ public class MoodboardProcessingService {
             img.setSousCategorie(classification.sousCategorie());
             img.setConfidence(classification.confidence());
 
-            // Style + couleur analysis for ALL categories (not just NEGAFA)
             var styleResult = imageAnalysisService.analyzeImage(imageData);
             img.setCouleurDominante(styleResult.couleurDominante());
             img.setStyle(styleResult.styleProfile().getStyle());
@@ -42,7 +42,8 @@ public class MoodboardProcessingService {
             img.setBudgetPercu(styleResult.styleProfile().getBudgetPercu());
 
             img.setAnalysisStatus("DONE");
-            log.info("Analysis [DONE] for image {}: {}/{}", imageId, classification.categorie(), classification.sousCategorie());
+            log.info("Analysis [DONE] for image {}: {}/{}", imageId, classification.categorie(),
+                    classification.sousCategorie());
 
         } catch (Exception e) {
             img.setAnalysisStatus("FAILED");
@@ -52,7 +53,6 @@ public class MoodboardProcessingService {
         moodboardImageRepository.save(img);
         updateClientProfile(clientId);
 
-        // Notify frontend via WebSocket
         messagingTemplate.convertAndSend("/topic/moodboard/" + clientId, img);
     }
 
@@ -60,13 +60,15 @@ public class MoodboardProcessingService {
         List<MoodboardImage> images = moodboardImageRepository.findByClientId(clientId);
         List<StyleProfile> profiles = images.stream()
                 .map(img -> {
-                    if (img.getStyle() == null) return null;
+                    if (img.getStyle() == null)
+                        return null;
                     return new StyleProfile(img.getStyle(), img.getPalette(), img.getAmbiance(), img.getBudgetPercu());
                 })
                 .filter(p -> p != null)
                 .toList();
 
-        if (profiles.isEmpty()) return;
+        if (profiles.isEmpty())
+            return;
 
         clientRepository.findById(clientId).ifPresent(client -> {
             client.setStyleProfile(imageAnalysisService.calculateAverageProfile(profiles));
