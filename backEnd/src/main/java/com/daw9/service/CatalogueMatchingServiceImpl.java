@@ -22,7 +22,18 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
     private final MoodboardImageRepository moodboardRepo;
 
     private static final Set<String> TENUES_SOUS_CATEGORIES = Set.of(
-            "caftan", "takchita", "lebsa", "robe-moderne", "jabador", "costume"
+            "caftan", "takchita", "lebsa", "robe-moderne", "jabador", "costume");
+
+    private static final int SIMILARITY_THRESHOLD = 20;
+
+    private static final Map<String, List<String>> COLOR_GROUPS = Map.of(
+            "rouge", List.of("rouge", "bordeaux", "fuchsia", "brique", "corail", "vin", "prune"),
+            "bleu", List.of("bleu", "turquoise", "marine", "ciel", "royal"),
+            "vert", List.of("vert", "emeraude", "menthe", "sapin", "olive"),
+            "rose", List.of("rose", "pale", "fuchsia", "saumon"),
+            "dore", List.of("dore", "or", "jaune", "ambre"),
+            "argent", List.of("argent", "gris", "platine"),
+            "blanc", List.of("blanc", "creme", "ivoire", "beige", "sable")
     );
 
     public Map<String, Object> getSuggestions(Long clientId) {
@@ -50,9 +61,10 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
             String couleurClient = getCouleurDominante(imagesForSousCategorie);
 
             // Matcher en utilisant le profil spécifique ou le profil global del client
-            List<CatalogueItem> items = findMatchingItems(sousCategorie, imagesForSousCategorie.get(0).getCategorie(), couleurClient, subProfile);
+            List<CatalogueItem> items = findMatchingItems(sousCategorie, imagesForSousCategorie.get(0).getCategorie(),
+                    couleurClient, subProfile);
             result.put(sousCategorie, items);
-            
+
             log.info("Matching '{}': {} articles trouvés (couleur={}, profile={})",
                     sousCategorie, items.size(), couleurClient, subProfile != null ? "SPECIFIC" : "NONE");
         }
@@ -60,9 +72,6 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
         return result;
     }
 
-    /**
-     * Extrait la couleur dominante des images du client
-     */
     private String getCouleurDominante(List<MoodboardImage> images) {
         return images.stream()
                 .map(MoodboardImage::getCouleurDominante)
@@ -73,19 +82,19 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
                 .orElse(null);
     }
 
-    /**
-     * Trouve les articles de la sous-catégorie donnée, triés par score de similarité (Style + Couleur).
-     * Si aucun article n'est trouvé en sous-catégorie, fallback sur la catégorie globale.
-     */
-    private List<CatalogueItem> findMatchingItems(String sousCategorie, CategoriePrestataire categorie, String couleurClient,
+    private List<CatalogueItem> findMatchingItems(String sousCategorie, CategoriePrestataire categorie,
+            String couleurClient,
             StyleProfile clientProfile) {
-        
-        List<CatalogueItem> items = catalogueItemRepository.findBySousCategorie(sousCategorie, org.springframework.data.domain.Pageable.unpaged()).getContent();
+
+        List<CatalogueItem> items = catalogueItemRepository
+                .findBySousCategorie(sousCategorie, org.springframework.data.domain.Pageable.unpaged()).getContent();
 
         // FALLBACK: Si vide, chercher par catégorie
         if (items.isEmpty() && categorie != null) {
-            log.info("Aucun article trouvé pour la sous-catégorie '{}'. Fallback sur la catégorie '{}'.", sousCategorie, categorie);
-            items = catalogueItemRepository.findByCategorie(categorie.name(), org.springframework.data.domain.Pageable.unpaged()).getContent();
+            log.info("Aucun article trouvé pour la sous-catégorie '{}'. Fallback sur la catégorie '{}'.", sousCategorie,
+                    categorie);
+            items = catalogueItemRepository
+                    .findByCategorie(categorie.name(), org.springframework.data.domain.Pageable.unpaged()).getContent();
         }
 
         if (items.isEmpty()) {
@@ -97,18 +106,22 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
             List<CatalogueItem> filtered = items.stream()
                     .filter(item -> matchesCouleur(item.getCouleurDominante(), couleurClient))
                     .collect(Collectors.toList());
-            
+
             if (!filtered.isEmpty()) {
-                log.info("Filtrage couleur STRICT pour '{}': {} -> {} articles", sousCategorie, items.size(), filtered.size());
+                log.info("Filtrage couleur STRICT pour '{}': {} -> {} articles", sousCategorie, items.size(),
+                        filtered.size());
                 items = filtered;
             } else {
-                log.info("Aucun article ne matche la couleur '{}' pour '{}', on garde la liste complete (non strict fallback)", couleurClient, sousCategorie);
+                log.info(
+                        "Aucun article ne matche la couleur '{}' pour '{}', on garde la liste complete (non strict fallback)",
+                        couleurClient, sousCategorie);
             }
         }
 
         // Trier par score de similarité (StyleProfile + Couleur bonus)
         return items.stream()
                 .map(item -> new ItemWithScore(item, calculateSimilarityScore(item, clientProfile, couleurClient)))
+                .filter(iws -> iws.score >= SIMILARITY_THRESHOLD)
                 .sorted((a, b) -> Integer.compare(b.score, a.score))
                 .peek(iws -> log.debug("Item Match: {} (Score: {})", iws.item.getNom(), iws.score))
                 .map(iws -> iws.item)
@@ -117,17 +130,29 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
     }
 
     /**
-     * Vérifie si la couleur de l'item correspond à celle du client
+     * Vérifie si la couleur de l'item correspond à celle du client (avec groupes de couleurs)
      */
     private boolean matchesCouleur(String couleurItem, String couleurClient) {
-        if (couleurItem == null || couleurItem.isBlank()) {
+        if (couleurItem == null || couleurItem.isBlank() || couleurClient == null || couleurClient.isBlank()) {
             return false;
         }
         String ci = couleurItem.toLowerCase().trim();
         String cc = couleurClient.toLowerCase().trim();
 
-        // Correspondance exacte ou partielle
-        return ci.equals(cc) || ci.contains(cc) || cc.contains(ci);
+        // 1. Correspondance exacte ou partielle simple
+        if (ci.equals(cc) || ci.contains(cc) || cc.contains(ci)) {
+            return true;
+        }
+
+        // 2. Correspondance par groupe
+        for (Map.Entry<String, List<String>> group : COLOR_GROUPS.entrySet()) {
+            List<String> synonyms = group.getValue();
+            if (synonyms.contains(cc) && synonyms.contains(ci)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -135,7 +160,7 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
      */
     private int calculateSimilarityScore(CatalogueItem item, StyleProfile clientProfile, String couleurClient) {
         int score = 0;
-        
+
         // Bonus si la couleur matche (+40 pts car c'est tres important pour les tenues)
         if (matchesCouleur(item.getCouleurDominante(), couleurClient)) {
             score += 40;
@@ -145,13 +170,9 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
             return score + (item.getImages() != null && !item.getImages().isEmpty() ? 5 : 0);
         }
 
-        StyleProfile itemProfile = new StyleProfile(
-                item.getStyle(), 
-                item.getPalette(), 
-                item.getAmbiance(), 
-                item.getBudgetPercu()
-            );
-        if (itemProfile.getStyle() == null && itemProfile.getPalette() == null && itemProfile.getAmbiance() == null && itemProfile.getBudgetPercu() == null) {
+        StyleProfile itemProfile = item.getStyleProfile();
+        if (itemProfile == null || (itemProfile.getStyle() == null && itemProfile.getPalette() == null
+                && itemProfile.getAmbiance() == null && itemProfile.getBudgetPercu() == null)) {
             return score + (item.getImages() != null && !item.getImages().isEmpty() ? 5 : 0);
         }
 
@@ -187,8 +208,9 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
     private StyleProfile calculateAverageProfile(List<MoodboardImage> images) {
         List<StyleProfile> profiles = images.stream()
                 .map(img -> {
-                    if (img.getStyle() == null) return null;
-                    return new StyleProfile(img.getStyle(), img.getPalette(), img.getAmbiance(), img.getBudgetPercu());
+                    if (img.getStyleProfile() == null || img.getStyleProfile().getStyle() == null)
+                        return null;
+                    return img.getStyleProfile();
                 })
                 .filter(Objects::nonNull)
                 .toList();
@@ -202,21 +224,24 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
         Map<String, Integer> budgetCounts = new HashMap<>();
 
         for (MoodboardImage img : images) {
-            if (img.getStyle() != null)
-                styleCounts.merge(img.getStyle().name(), 1, Integer::sum);
-            if (img.getPalette() != null)
-                paletteCounts.merge(img.getPalette().name(), 1, Integer::sum);
-            if (img.getAmbiance() != null)
-                ambianceCounts.merge(img.getAmbiance().name(), 1, Integer::sum);
-            if (img.getBudgetPercu() != null)
-                budgetCounts.merge(img.getBudgetPercu().name(), 1, Integer::sum);
+            StyleProfile sp = img.getStyleProfile();
+            if (sp != null) {
+                if (sp.getStyle() != null)
+                    styleCounts.merge(sp.getStyle().name(), 1, (a, b) -> a + b);
+                if (sp.getPalette() != null)
+                    paletteCounts.merge(sp.getPalette().name(), 1, (a, b) -> a + b);
+                if (sp.getAmbiance() != null)
+                    ambianceCounts.merge(sp.getAmbiance().name(), 1, (a, b) -> a + b);
+                if (sp.getBudgetPercu() != null)
+                    budgetCounts.merge(sp.getBudgetPercu().name(), 1, (a, b) -> a + b);
+            }
         }
 
         StyleProfile avg = new StyleProfile();
-        getMostFrequent(styleCounts).ifPresent(s -> avg.setStyle(com.daw9.model.enums.StyleType.valueOf(s)));
-        getMostFrequent(paletteCounts).ifPresent(s -> avg.setPalette(com.daw9.model.enums.PaletteType.valueOf(s)));
-        getMostFrequent(ambianceCounts).ifPresent(s -> avg.setAmbiance(com.daw9.model.enums.AmbianceType.valueOf(s)));
-        getMostFrequent(budgetCounts).ifPresent(s -> avg.setBudgetPercu(com.daw9.model.enums.BudgetType.valueOf(s)));
+        getMostFrequent(styleCounts).ifPresent(s -> avg.setStyle(StyleType.valueOf(s)));
+        getMostFrequent(paletteCounts).ifPresent(s -> avg.setPalette(PaletteType.valueOf(s)));
+        getMostFrequent(ambianceCounts).ifPresent(s -> avg.setAmbiance(AmbianceType.valueOf(s)));
+        getMostFrequent(budgetCounts).ifPresent(s -> avg.setBudgetPercu(BudgetType.valueOf(s)));
 
         return avg;
     }
