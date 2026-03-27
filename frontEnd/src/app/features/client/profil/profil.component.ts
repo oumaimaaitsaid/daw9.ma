@@ -62,8 +62,16 @@ export class ClientProfilComponent implements OnInit {
     phone: ['', [Validators.required, Validators.pattern(/^(06|07|05)[0-9]{8}$/)]],
     ville: ['', Validators.required],
     budget: [0, [Validators.min(1000)]],
-    dateMarriage: ['']
+    dateMarriage: ['', [Validators.required, this.futureDateValidator]]
   });
+
+  futureDateValidator(control: any) {
+    if (!control.value) return null;
+    const date = new Date(control.value);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return date < today ? { pastDate: true } : null;
+  }
 
   ngOnInit() {
     this.load();

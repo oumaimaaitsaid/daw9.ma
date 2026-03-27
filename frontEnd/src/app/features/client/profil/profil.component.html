@@ -92,10 +92,15 @@
 
                     <div class="space-y-2">
                        <label class="text-[10px] font-bold text-text-muted uppercase tracking-widest ml-4 underline decoration-primary/30">Ville de Résidence</label>
-                       <input type="text" formControlName="ville"
-                              [class.border-red-400]="profileForm.get('ville')?.invalid && profileForm.get('ville')?.touched"
-                              class="w-full px-6 py-4 rounded-[20px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-serif italic text-lg transition-all"
-                              placeholder="Ex: Casablanca">
+                       <select formControlName="ville"
+                               [class.border-red-400]="profileForm.get('ville')?.invalid && profileForm.get('ville')?.touched"
+                               class="w-full px-6 py-4 rounded-[20px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-serif italic text-lg transition-all cursor-pointer">
+                         <option value="">Sélectionner</option>
+                         <option value="Casablanca">Casablanca</option>
+                         <option value="Safi">Safi</option>
+                         <option value="Marrakech">Marrakech</option>
+                         <option value="Agadir">Agadir</option>
+                       </select>
                        @if (profileForm.get('ville')?.invalid && profileForm.get('ville')?.touched) {
                          <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-2 ml-4">Ville requise</p>
                        }
@@ -128,7 +133,10 @@
                               [class.border-red-400]="profileForm.get('dateMarriage')?.invalid && profileForm.get('dateMarriage')?.touched"
                               class="w-full px-6 py-4 rounded-[20px] bg-white border border-primary/10 focus:border-primary focus:ring-0 text-secondary font-serif italic text-lg transition-all">
                        @if (profileForm.get('dateMarriage')?.invalid && profileForm.get('dateMarriage')?.touched) {
-                         <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-2 ml-4">Date requise</p>
+                         <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-2 ml-4">
+                           @if (profileForm.get('dateMarriage')?.errors?.['pastDate']) { La date doit être dans le futur }
+                           @else { Date requise }
+                         </p>
                        }
                     </div>
                    </div>
