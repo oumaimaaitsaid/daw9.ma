@@ -2,7 +2,6 @@ package com.daw9.service;
 
 import com.daw9.model.MoodboardImage;
 import com.daw9.model.StyleProfile;
-import com.daw9.model.enums.CategoriePrestataire;
 import com.daw9.repository.ClientRepository;
 import com.daw9.repository.MoodboardImageRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +35,7 @@ public class MoodboardProcessingService {
 
             var styleResult = imageAnalysisService.analyzeImage(imageData);
             img.setCouleurDominante(styleResult.couleurDominante());
-            img.setStyle(styleResult.styleProfile().getStyle());
-            img.setPalette(styleResult.styleProfile().getPalette());
-            img.setAmbiance(styleResult.styleProfile().getAmbiance());
-            img.setBudgetPercu(styleResult.styleProfile().getBudgetPercu());
+            img.setStyleProfile(styleResult.styleProfile());
 
             img.setAnalysisStatus("DONE");
             log.info("Analysis [DONE] for image {}: {}/{}", imageId, classification.categorie(),
@@ -60,9 +56,9 @@ public class MoodboardProcessingService {
         List<MoodboardImage> images = moodboardImageRepository.findByClientId(clientId);
         List<StyleProfile> profiles = images.stream()
                 .map(img -> {
-                    if (img.getStyle() == null)
+                    if (img.getStyleProfile() == null || img.getStyleProfile().getStyle() == null)
                         return null;
-                    return new StyleProfile(img.getStyle(), img.getPalette(), img.getAmbiance(), img.getBudgetPercu());
+                    return img.getStyleProfile();
                 })
                 .filter(p -> p != null)
                 .toList();
