@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, ChangeDetectorRef, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -23,8 +23,8 @@ import { environment } from '../../../../environments/environment';
   selector: 'app-client-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
+    CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     InspirationGridComponent,
     EmptyStateComponent,
@@ -87,6 +87,7 @@ export class ClientDashboardComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   activeTab: 'inspirations' | 'catalogue' = 'inspirations';
   showSplash = signal<boolean>(true);
@@ -96,8 +97,9 @@ export class ClientDashboardComponent implements OnInit {
   loading = true;
   loadingCatalogue = false;
   isDragging = false;
-  uploadingCount = 0;
+  uploadingCount = signal<number>(0);
   showReservationModal = false;
+  showQuoteModal = false;
   showCartDrawer = false;
   moodboardSelection = signal<CatalogueItem[]>([]);
   errorMessage = signal<string>('');
@@ -114,11 +116,19 @@ export class ClientDashboardComponent implements OnInit {
 
   clientProfile: any = null;
   reservationForm: FormGroup = this.fb.group({
-    dateEvenement: ['', Validators.required],
+    dateEvenement: ['', [Validators.required, this.futureDateValidator]],
     nombreInvites: [1, [Validators.required, Validators.min(1)]],
     ville: ['', Validators.required],
     message: ['']
   });
+
+  futureDateValidator(control: any) {
+    if (!control.value) return null;
+    const date = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today ? { pastDate: true } : null;
+  }
 
   expandedSections = {
     negafa: true,
@@ -131,11 +141,35 @@ export class ClientDashboardComponent implements OnInit {
     this.loadProfile();
     this.loadMoodboard();
     this.findMatches();
-    this.loadCategoryFull('negafa');
-    
+
+    // Handle Deep-linking from Navbar
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        const tab = params.get('tab');
+        const category = params.get('category');
+
+        if (tab === 'inspirations') {
+          this.switchTab('inspirations');
+        } else if (tab === 'catalogue') {
+          this.switchTab('catalogue');
+          if (category) {
+            this.loadCategoryFull(category);
+            // Auto-expand the relevant section for UI consistency
+            if (Object.keys(this.expandedSections).includes(category)) {
+              this.expandedSections[category as keyof typeof this.expandedSections] = true;
+            }
+          }
+        } else {
+          // Default load if no params
+          this.loadCategoryFull('negafa');
+        }
+      });
+
     // Luxury Splash reveal timer
     setTimeout(() => {
       this.showSplash.set(false);
+      this.updateBodyState(); // Initial check
       this.cdr.detectChanges();
     }, 1800);
   }
@@ -146,10 +180,12 @@ export class ClientDashboardComponent implements OnInit {
       .subscribe({
         next: (profile: Client) => {
           if (profile.active === false) {
-             this.router.navigate(['/auth/banned']);
-             return;
+            this.router.navigate(['/auth/banned']);
+            return;
           }
           this.clientProfile = profile;
+          this.notificationService.connectWebSocket(profile.id);
+          this.listenForMoodboardUpdates();
           if (profile.dateMarriage) {
             this.reservationForm.patchValue({ dateEvenement: profile.dateMarriage });
           }
@@ -229,7 +265,7 @@ export class ClientDashboardComponent implements OnInit {
     if (this.sortBy() === 'asc') {
       return items.sort((a, b) => (a.prix || a.prixParPersonne || 0) - (b.prix || b.prixParPersonne || 0));
     } else if (this.sortBy() === 'desc') {
-      return items.sort((a, b) => (b.prix || b.prixParPersonne || 0) - (a.prix || a.prixParPersonne || 0));
+      return items.sort((a, b) => (b.prix || b.prixParPersonne || 0) - (a.prix || b.prixParPersonne || 0));
     }
     return items;
   }
@@ -257,7 +293,7 @@ export class ClientDashboardComponent implements OnInit {
   toggleSection(section: keyof typeof this.expandedSections) {
     this.expandedSections[section] = !this.expandedSections[section];
     if (section === 'traiteur' && this.expandedSections.traiteur) {
-        this.reservationForm.patchValue({ nombreInvites: this.clientProfile?.nombreInvites || 100 });
+      this.reservationForm.patchValue({ nombreInvites: this.clientProfile?.nombreInvites || 100 });
     }
   }
 
@@ -318,7 +354,11 @@ export class ClientDashboardComponent implements OnInit {
   }
 
   // Mandatory methods for HTML
-  toggleCartDrawer() { this.showCartDrawer = !this.showCartDrawer; this.cdr.detectChanges(); }
+  toggleCartDrawer() {
+    this.showCartDrawer = !this.showCartDrawer;
+    this.updateBodyState();
+    this.cdr.detectChanges();
+  }
   removeSelection(index: number) { this.basketService.removeItem(index); this.cdr.detectChanges(); }
 
   reserveItemDirectly(item: any) {
@@ -326,8 +366,15 @@ export class ClientDashboardComponent implements OnInit {
     this.toastService.success(`${item.nom} ajouté au panier.`);
   }
 
-  openReservationModal() { this.showReservationModal = true; this.cdr.detectChanges(); }
-  closeReservationModal() { this.showReservationModal = false; this.cdr.detectChanges(); }
+  openReservationModal() { this.showReservationModal = true; this.updateBodyState(); this.cdr.detectChanges(); }
+  closeReservationModal() { this.showReservationModal = false; this.updateBodyState(); this.cdr.detectChanges(); }
+
+  openQuoteModal() { this.showQuoteModal = true; this.updateBodyState(); this.cdr.detectChanges(); }
+  closeQuoteModal() { this.showQuoteModal = false; this.updateBodyState(); this.cdr.detectChanges(); }
+
+  printQuote() {
+    window.print();
+  }
 
   submitReservation() {
     if (this.reservationForm.invalid) {
@@ -343,12 +390,24 @@ export class ClientDashboardComponent implements OnInit {
       itemIds: items.map(i => i.id)
     };
 
+    // Auto-sync with profile if changed
+    if (this.clientProfile && (
+        this.reservationForm.value.dateEvenement !== this.clientProfile.dateMarriage ||
+        this.reservationForm.value.ville !== this.clientProfile.ville)) {
+      this.profilService.updateProfile({
+        ...this.clientProfile,
+        dateMarriage: this.reservationForm.value.dateEvenement,
+        ville: this.reservationForm.value.ville
+      }).subscribe(updated => this.clientProfile = updated);
+    }
+
     this.reservationService.createReservation(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.submitting = false;
           this.showReservationModal = false;
+          this.updateBodyState();
           this.basketService.clear();
           this.successMessage = 'Félicitations ! Votre demande a été transmise à notre conciergerie.';
           this.cdr.detectChanges();
@@ -364,11 +423,11 @@ export class ClientDashboardComponent implements OnInit {
 
   hasSelection(): boolean { return this.basketService.items().length > 0; }
 
-  zoomImage(img: MoodboardImage) { this.zoomedImage = img; }
-  closeZoom() { this.zoomedImage = null; }
-  zoomCatalogueItem(item: any) { 
+  zoomImage(img: MoodboardImage) { this.zoomedImage = img; this.updateBodyState(); }
+  closeZoom() { this.zoomedImage = null; this.updateBodyState(); }
+  zoomCatalogueItem(item: any) {
     if (item.images && item.images.length > 0) {
-      this.zoomImage({ id: item.id, imageUrl: (typeof item.images[0] === 'object' ? item.images[0].url : item.images[0]), categorie: item.categorie, sousCategorie: item.sousCategorie } as any); 
+      this.zoomImage({ id: item.id, imageUrl: (typeof item.images[0] === 'object' ? item.images[0].url : item.images[0]), categorie: item.categorie, sousCategorie: item.sousCategorie } as any);
     }
   }
 
@@ -389,7 +448,7 @@ export class ClientDashboardComponent implements OnInit {
   validateAndUpload(files: FileList) {
     const validFiles: File[] = [];
     for (let i = 0; i < files.length; i++) {
-        if (this.ALLOWED_FORMATS.includes(files[i].type)) validFiles.push(files[i]);
+      if (this.ALLOWED_FORMATS.includes(files[i].type)) validFiles.push(files[i]);
     }
     if (validFiles.length > 0) this.executeUpload(validFiles);
   }
@@ -397,7 +456,7 @@ export class ClientDashboardComponent implements OnInit {
   executeUpload(files: File[]) {
     const formData = new FormData();
     files.forEach(file => formData.append('files', file));
-    this.uploadingCount += files.length;
+    this.uploadingCount.update(c => c + files.length);
     this.cdr.detectChanges();
 
     this.moodboardService.uploadBulk(formData)
@@ -405,13 +464,13 @@ export class ClientDashboardComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastService.success(`${files.length} inspiration(s) analysées.`);
-          this.uploadingCount -= files.length;
+          this.uploadingCount.update(c => Math.max(0, c - files.length));
           this.loadMoodboard();
           this.findMatches();
         },
         error: () => {
           this.toastService.error('Erreur upload.');
-          this.uploadingCount -= files.length;
+          this.uploadingCount.update(c => Math.max(0, c - files.length));
           this.cdr.detectChanges();
         }
       });
@@ -424,16 +483,42 @@ export class ClientDashboardComponent implements OnInit {
 
   getImageUrl(path: any): string {
     if (!path) return '';
-    
+
     // Robustly handle both string paths and objects with a 'url' property
     const actualPath = (typeof path === 'object' && path !== null && 'url' in path) ? path.url : path;
-    
+
     if (!actualPath || typeof actualPath !== 'string') return '';
     if (actualPath.startsWith('http')) return actualPath;
-    
+
     const normalizedPath = actualPath.startsWith('/') ? actualPath : '/' + actualPath;
     return this.serverUrl + normalizedPath;
   }
 
   logout() { this.authService.logout(); }
+
+  private listenForMoodboardUpdates() {
+    this.notificationService.moodboardUpdate$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((updatedImage: MoodboardImage) => {
+        // Use a new array reference to trigger OnPush detection in InspirationGrid
+        const index = this.moodboard.findIndex(img => img.id === updatedImage.id);
+        if (index !== -1) {
+          const newMoodboard = [...this.moodboard];
+          newMoodboard[index] = { ...newMoodboard[index], ...updatedImage };
+          this.moodboard = newMoodboard;
+        } else {
+          this.moodboard = [updatedImage, ...this.moodboard];
+        }
+        
+        this.cdr.detectChanges();
+      });
+  }
+
+  private updateBodyState() {
+    if (this.showCartDrawer || this.showReservationModal || this.showQuoteModal || this.zoomedImage) {
+      document.body.classList.add('modal-active');
+    } else {
+      document.body.classList.remove('modal-active');
+    }
+  }
 }
