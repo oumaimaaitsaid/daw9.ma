@@ -30,8 +30,5 @@ jobs:
     - name: Install Dependencies
       run: npm ci
 
-    - name: Lint and Format Check (Optional)
-      run: npm run lint || true
-
     - name: Build Angular App
       run: npm run build -- --configuration production

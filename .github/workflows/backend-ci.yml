@@ -18,14 +18,19 @@ jobs:
         working-directory: backEnd
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:15
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: daw9_db
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: daw9_db
         ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - uses: actions/checkout@v4
@@ -40,6 +45,6 @@ jobs:
     - name: Build and Test with Maven
       run: mvn -B clean verify -Dspring.profiles.active=test
       env:
-        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/daw9_db
-        SPRING_DATASOURCE_USERNAME: root
-        SPRING_DATASOURCE_PASSWORD: root
+        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/daw9_db
+        DB_USERNAME: root
+        DB_PASSWORD: root
