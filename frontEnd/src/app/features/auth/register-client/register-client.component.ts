@@ -98,12 +98,9 @@ import { AuthService } from '../../../core/services/auth.service';
                         class="w-full px-6 py-4 bg-background border border-primary/10 rounded-2xl focus:ring-1 focus:ring-primary focus:border-primary transition-all text-sm outline-none cursor-pointer">
                   <option value="">Sélectionner</option>
                   <option value="Casablanca">Casablanca</option>
-                  <option value="Rabat">Rabat</option>
+                  <option value="Safi">Safi</option>
                   <option value="Marrakech">Marrakech</option>
-                  <option value="Fès">Fès</option>
-                  <option value="Tanger">Tanger</option>
                   <option value="Agadir">Agadir</option>
-                  <option value="Meknès">Meknès</option>
                 </select>
                 @if (form.get('ville')?.invalid && form.get('ville')?.touched) {
                   <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-2 ml-4">Ville requise</p>
