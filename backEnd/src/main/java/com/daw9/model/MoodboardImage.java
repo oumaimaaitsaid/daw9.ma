@@ -27,17 +27,8 @@ public class MoodboardImage {
     @Column(name = "file_name")
     private String fileName;
 
-    @Enumerated(EnumType.STRING)
-    private StyleType style;
-
-    @Enumerated(EnumType.STRING)
-    private PaletteType palette;
-
-    @Enumerated(EnumType.STRING)
-    private AmbianceType ambiance;
-
-    @Enumerated(EnumType.STRING)
-    private BudgetType budgetPercu;
+    @Embedded
+    private StyleProfile styleProfile;
 
     @Enumerated(EnumType.STRING)
     private CategoriePrestataire categorie;
