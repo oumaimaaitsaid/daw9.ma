@@ -35,7 +35,8 @@ public class CatalogueItem implements Serializable {
     // Sous-catégorie: caftan, takchita, maquillage, etc.
     private String sousCategorie;
 
-    // Type spécifique (ex: pour lebsa -> fassiya, rbatiya, sahraouia, soussia, chamalia)
+    // Type spécifique (ex: pour lebsa -> fassiya, rbatiya, sahraouia, soussia,
+    // chamalia)
     private String type;
 
     // Couleur dominante de la tenue (pour le matching par couleur)
@@ -64,19 +65,12 @@ public class CatalogueItem implements Serializable {
     private List<String> images = new ArrayList<>();
 
     // Profil de style analysé par IA (pour le matching)
-    @Enumerated(EnumType.STRING)
-    @Column(name = "style_profile_style")
-    private com.daw9.model.enums.StyleType style;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "style_profile_palette")
-    private com.daw9.model.enums.PaletteType palette;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "style_profile_ambiance")
-    private com.daw9.model.enums.AmbianceType ambiance;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "style_profile_budget")
-    private com.daw9.model.enums.BudgetType budgetPercu;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "style", column = @Column(name = "style_profile_style")),
+            @AttributeOverride(name = "palette", column = @Column(name = "style_profile_palette")),
+            @AttributeOverride(name = "ambiance", column = @Column(name = "style_profile_ambiance")),
+            @AttributeOverride(name = "budgetPercu", column = @Column(name = "style_profile_budget"))
+    })
+    private StyleProfile styleProfile;
 }
