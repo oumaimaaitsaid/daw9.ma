@@ -4,6 +4,7 @@ import com.daw9.model.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "notifications")
@@ -17,7 +18,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnore
+    @JsonIgnore
     private User user;
 
     @Enumerated(EnumType.STRING)
@@ -33,7 +34,6 @@ public class Notification {
 
     @Column(name = "created_at")
     private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
-
 
     public static Notification createForClient(User user, NotificationType type, String titre, String message) {
         Notification notif = new Notification();
