@@ -1,3 +1,5 @@
+import { StyleProfile } from './style-profile.model';
+
 export interface Client {
   id: number;
   nom: string;
@@ -10,6 +12,7 @@ export interface Client {
   createdAt?: string;
   active?: boolean;
   nombreInvites?: number;
+  styleProfile?: StyleProfile;
 }
 
 export interface ClientProfileUpdate {

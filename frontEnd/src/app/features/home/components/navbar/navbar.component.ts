@@ -7,38 +7,34 @@ import { selectUnreadCount, selectNotifications } from '../../../../core/state/n
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { LogoComponent } from '../../../../shared/components/logo/logo.component';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterLink, LogoComponent],
   template: `
-    <nav class="sticky top-0 z-[100] bg-white/90 backdrop-blur-md border-b border-black/5">
+    <nav class="sticky top-0 z-[100] bg-white/95 backdrop-blur-2xl border-b border-primary/5 shadow-sm">
       <div class="max-w-7xl mx-auto px-6 lg:px-12">
-        <div class="flex justify-between items-center h-16 lg:h-[72px]">
+        <div class="flex justify-between items-center h-24 lg:h-24">
           
           <!-- Logo Section -->
-          <a routerLink="/" class="flex items-center no-underline group">
-            <app-logo [size]="45"></app-logo>
+          <a routerLink="/" class="flex items-center no-underline h-full group">
+            <app-logo class="scale-[0.7] md:scale-100 transition-transform origin-left" [size]="80" variant="light"></app-logo>
           </a>
 
           <!-- Desktop Navigation -->
-          <div class="hidden md:flex items-center gap-8">
+          <div class="hidden md:flex items-center gap-10">
             <a *ngFor="let link of navLinks" 
                [routerLink]="link.path" 
-               [fragment]="link.fragment"
-               class="text-sm font-medium text-[#1a1a1a] hover:text-primary transition-colors no-underline">
+               [queryParams]="link.queryParams"
+               class="nav-link text-[#1a1a1a]">
                {{ link.label }}
             </a>
           </div>
 
           <!-- Actions & Auth -->
-          <div class="flex items-center gap-3 sm:gap-6">
-            <button class="flex items-center gap-1.5 text-[#1a1a1a] hover:text-primary transition-colors text-sm font-medium">
-              <span class="material-symbols-outlined text-[24px]">search</span>
-              <span class="hidden sm:inline">Qelleb</span>
-            </button>
-
+          <div class="flex items-center gap-3 sm:gap-8">
             <!-- Notifications (Solo for Logged In) -->
             <div class="relative" *ngIf="authService.isLoggedIn">
               <button (click)="toggleNotifications()" 
@@ -52,12 +48,12 @@ import { LogoComponent } from '../../../../shared/components/logo/logo.component
 
               <!-- Notifications Dropdown -->
               <div *ngIf="isNotificationsOpen" 
-                   class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[110] animate-in fade-in zoom-in duration-200">
+                   class="absolute right-0 mt-5 w-96 bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-[#D4AF37]/20 overflow-hidden z-[110] animate-in fade-in zoom-in duration-300">
                 
-                <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
                   <div class="flex flex-col">
-                    <h3 class="font-bold text-gray-900 text-sm">Notifications</h3>
-                    <span class="text-[10px] text-primary font-bold uppercase">{{ (unreadCount$ | async) || 0 }} Nouvelles</span>
+                    <h3 class="font-serif italic font-black text-secondary text-lg">Notifications</h3>
+                    <span class="text-[9px] text-[#D4AF37] font-black uppercase tracking-widest">{{ (unreadCount$ | async) || 0 }} Alertes</span>
                   </div>
                   <button (click)="clearAll()" 
                           *ngIf="(notifications$ | async)?.length! > 0"
@@ -82,9 +78,9 @@ import { LogoComponent } from '../../../../shared/components/logo/logo.component
                       </div>
 
                       <div class="flex-1 pr-6" (click)="markAsRead(notif.id)">
-                        <p class="text-sm font-semibold text-gray-900 leading-tight">{{ notif?.titre }}</p>
-                        <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{{ notif?.message }}</p>
-                        <span class="text-[9px] font-medium text-gray-400 mt-2 block">{{ notif?.createdAt | date:'HH:mm' }} • Daw9.ma</span>
+                        <p class="text-[13px] font-bold text-secondary leading-tight font-serif italic">{{ notif?.titre }}</p>
+                        <p class="text-[11px] text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">{{ notif?.message }}</p>
+                        <span class="text-[8px] font-black text-[#D4AF37] mt-2 block uppercase tracking-widest">{{ notif?.createdAt | date:'HH:mm' }} • DAW9.MA</span>
                       </div>
 
                       <button (click)="deleteSingle(notif.id); $event.stopPropagation()" 
@@ -106,8 +102,8 @@ import { LogoComponent } from '../../../../shared/components/logo/logo.component
 
             <!-- Auth Section -->
             <ng-container *ngIf="!authService.isLoggedIn; else userMenu">
-              <a routerLink="/auth/login" class="bg-[#1a1a1a] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-black transition-all no-underline shadow-sm">
-                Se connecter
+              <a routerLink="/auth/login" class="bg-[#1a1a1a] text-white px-8 py-3 rounded-full text-[12px] font-black font-serif uppercase tracking-[0.2em] hover:bg-black hover:scale-105 transition-all no-underline shadow-lg">
+                Connexion
               </a>
             </ng-container>
 
@@ -125,29 +121,29 @@ import { LogoComponent } from '../../../../shared/components/logo/logo.component
 
                 <!-- User Dropdown -->
                 <div *ngIf="isUserMenuOpen" 
-                     class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[110] animate-in fade-in slide-in-from-top-2">
-                  <div class="p-4 border-b border-gray-50">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Session Active</p>
-                    <p class="text-sm font-bold text-gray-900 truncate">{{ authService.currentUser?.prenom }} {{ authService.currentUser?.nom }}</p>
+                     class="absolute right-0 mt-5 w-64 bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-[#D4AF37]/20 overflow-hidden z-[110] animate-in fade-in slide-in-from-top-2">
+                  <div class="p-6 border-b border-gray-50 bg-gray-50/30">
+                    <p class="text-[9px] font-black text-[#D4AF37] uppercase tracking-[0.3em] mb-2">Compte VIP</p>
+                    <p class="text-base font-serif italic font-black text-secondary truncate">{{ authService.currentUser?.prenom }} {{ authService.currentUser?.nom }}</p>
                   </div>
                   
-                  <div class="py-2">
+                  <div class="py-3 px-2">
                     <a [routerLink]="authService.userRole === 'ADMIN' ? '/admin/dashboard' : '/client/dashboard'" 
-                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-all no-underline">
-                      <span class="material-symbols-outlined text-lg">dashboard</span>
+                       class="flex items-center gap-4 px-5 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-secondary hover:bg-[#D4AF37]/5 hover:text-[#D4AF37] rounded-xl transition-all no-underline font-serif">
+                      <span class="material-symbols-outlined text-xl opacity-20">dashboard</span>
                       <span>Dashboard</span>
                     </a>
                     
                     <!-- Link to Reservations for clients -->
                     <a *ngIf="authService.userRole === 'CLIENT'" routerLink="/client/reservations" 
-                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-all no-underline">
-                      <span class="material-symbols-outlined text-lg">event</span>
+                       class="flex items-center gap-4 px-5 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-secondary hover:bg-[#D4AF37]/5 hover:text-[#D4AF37] rounded-xl transition-all no-underline font-serif">
+                      <span class="material-symbols-outlined text-xl opacity-20">event</span>
                       <span>Mes Réservations</span>
                     </a>
 
                     <a [routerLink]="authService.userRole === 'ADMIN' ? '/admin/profil' : '/client/profil'" 
-                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-all no-underline">
-                      <span class="material-symbols-outlined text-lg">person</span>
+                       class="flex items-center gap-4 px-5 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-secondary hover:bg-[#D4AF37]/5 hover:text-[#D4AF37] rounded-xl transition-all no-underline font-serif">
+                      <span class="material-symbols-outlined text-xl opacity-20">person</span>
                       <span>Mon Profil</span>
                     </a>
                   </div>
@@ -175,19 +171,66 @@ import { LogoComponent } from '../../../../shared/components/logo/logo.component
       <!-- Mobile Menu -->
       <div *ngIf="isMobileMenuOpen" 
            class="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 animate-in slide-in-from-top duration-300">
-        <div class="px-6 py-8 flex flex-col gap-6">
-          <a *ngFor="let link of navLinks" 
-             [routerLink]="link.path" 
-             [fragment]="link.fragment"
-             (click)="isMobileMenuOpen = false"
-             class="text-lg font-bold text-[#1a1a1a] hover:text-primary transition-colors no-underline flex items-center justify-between">
-             <span>{{ link.label }}</span>
-             <span class="material-symbols-outlined text-gray-300">chevron_right</span>
-          </a>
-        </div>
+          <div class="px-2 pt-2 pb-3 space-y-1">
+            <a *ngFor="let link of navLinks"
+               [routerLink]="link.path"
+               [queryParams]="link.queryParams"
+               (click)="isMobileMenuOpen = false"
+               class="block px-3 py-2 text-base font-serif font-black text-secondary hover:bg-primary/5 rounded-lg uppercase tracking-widest">
+               {{ link.label }}
+            </a>
+          </div>
       </div>
     </nav>
-  `
+  `,
+  styles: [`
+    .nav-link {
+      font-family: 'Playfair Display', serif;
+      font-size: 11px;
+      font-weight: 900;
+      color: #1a1a1a;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      position: relative;
+      padding: 0.5rem 0;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #D4AF37;
+      transition: width 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .nav-link:hover {
+      color: #D4AF37 !important;
+      letter-spacing: 0.35em;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .font-serif {
+      font-family: 'Playfair Display', serif;
+    }
+
+    :host-context(body.modal-active) nav {
+      transform: translateY(-110%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    nav {
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.5s ease;
+    }
+  `]
 })
 export class NavbarComponent {
   private store = inject(Store);
@@ -200,11 +243,11 @@ export class NavbarComponent {
   isMobileMenuOpen = false;
 
   navLinks = [
-    { label: 'Inspiration', path: '/', fragment: 'inspiration' },
-    { label: 'Négafa', path: '/', fragment: 'categories' },
-    { label: 'Traiteur', path: '/', fragment: 'categories' },
-    { label: 'Photographe', path: '/', fragment: 'categories' },
-    { label: 'DJ', path: '/', fragment: 'categories' }
+    { label: 'Inspiration', path: '/client/dashboard', queryParams: { tab: 'inspirations' } },
+    { label: 'Négafa', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'negafa' } },
+    { label: 'Traiteur', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'traiteur' } },
+    { label: 'Photographe', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'photographe' } },
+    { label: 'DJ', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'dj' } }
   ];
 
   unreadCount$ = this.store.select(selectUnreadCount);

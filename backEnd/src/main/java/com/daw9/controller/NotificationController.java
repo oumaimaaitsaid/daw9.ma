@@ -32,6 +32,11 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Notification>> getAllNotifications() {
+        return ResponseEntity.ok(notificationRepository.findTop10ByOrderByCreatedAtDesc());
+    }
+
     @PutMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable("id") Long id) {
         notificationRepository.findById(id).ifPresent(n -> {

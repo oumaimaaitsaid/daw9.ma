@@ -1,3 +1,5 @@
+import { StyleProfile } from './style-profile.model';
+
 export interface MoodboardImage {
   id: number;
   imageUrl: string;
@@ -7,6 +9,7 @@ export interface MoodboardImage {
   confidence: number;
   analysisStatus: string;
   couleurDominante?: string;
+  styleProfile?: StyleProfile;
   createdAt?: string;
 }
 

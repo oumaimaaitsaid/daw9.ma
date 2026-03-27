@@ -7,9 +7,11 @@
         <p class="subtitle-luxury">Gestion du Catalogue</p>
       </div>
       <h1 class="title-luxury">Collection {{ label() }}</h1>
-      <p class="text-text-muted text-[11px] mt-4 font-medium uppercase tracking-[0.2em] max-w-lg leading-relaxed italic">Curatage et maintenance de l'excellence opérationnelle.</p>
+      <p
+        class="text-text-muted text-[11px] mt-4 font-medium uppercase tracking-[0.2em] max-w-lg leading-relaxed italic">
+        Curatage et maintenance de l'excellence opérationnelle.</p>
     </div>
-    
+
     <button (click)="openForm()" class="btn-luxury-primary group">
       <span class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform">add</span>
       <span>Inscrire une nouvelle pièce</span>
@@ -17,94 +19,78 @@
   </div>
 
   <!-- Search Bar Discovery -->
-  <div class="relative group max-w-2xl reveal">
-    <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">search</span>
+  <div class="relative group max-w-2xl reveal mb-24">
+    <span
+      class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">search</span>
     <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-           placeholder="Rechercher dans la collection {{ label() }}..."
-           class="input-luxury pl-16">
+      placeholder="Rechercher dans la collection {{ label() }}..." class="input-luxury pl-16">
   </div>
 
   <!-- Luxury Table / Registry -->
-  <app-catalogue-table
-    [items]="items"
-    [loading]="loading"
-    [filteredItems]="filteredItems"
-    [serverUrl]="serverUrl"
-    (onEdit)="edit($event)"
-    (onDelete)="delete($event)"
-    (onOpenForm)="openForm()">
+  <app-catalogue-table [items]="items" [loading]="loading" [filteredItems]="filteredItems" [serverUrl]="serverUrl"
+    (onEdit)="edit($event)" (onDelete)="delete($event)" (onOpenForm)="openForm()">
   </app-catalogue-table>
 </div>
 
 <!-- Modal Formulaire Luxury Overlay -->
-<app-catalogue-form
-  [showForm]="showForm"
-  [isEdit]="isEdit"
-  [saving]="saving"
-  [currentItem]="currentItem"
-  [sousCategorie]="sousCategorie"
-  [serverUrl]="serverUrl"
-  [couleursStr]="couleursStr"
-  [taillesStr]="taillesStr"
-  [matieresStr]="matieresStr"
-  [stylesStr]="stylesStr"
-  [styleProfileStyle]="styleProfileStyle"
-  [styleProfilePalette]="styleProfilePalette"
-  [styleProfileAmbiance]="styleProfileAmbiance"
-  [styleProfileBudget]="styleProfileBudget"
-  (onClose)="closeForm()"
-  (onSave)="save($event)"
-  (onFiles)="files = $event">
+<app-catalogue-form [showForm]="showForm" [isEdit]="isEdit" [saving]="saving" [currentItem]="currentItem"
+  [sousCategorie]="sousCategorie" [serverUrl]="serverUrl" [couleursStr]="couleursStr" [taillesStr]="taillesStr"
+  [matieresStr]="matieresStr" [stylesStr]="stylesStr" [styleProfileStyle]="styleProfileStyle"
+  [styleProfilePalette]="styleProfilePalette" [styleProfileAmbiance]="styleProfileAmbiance"
+  [styleProfileBudget]="styleProfileBudget" (onClose)="closeForm()" (onSave)="save($event)" (onFiles)="files = $event">
 </app-catalogue-form>
 
 <!-- Luxury Success Toast -->
 @if (successMessage()) {
-  <div class="fixed bottom-12 right-12 bg-secondary text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-primary/20">
-    <span class="material-symbols-outlined text-primary text-2xl">check_circle</span>
-    <div>
-      <p class="font-serif text-lg font-bold">Opération Réussie</p>
-      <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest">{{ successMessage() }}</p>
-    </div>
+<div
+  class="fixed bottom-12 right-12 bg-secondary text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-primary/20">
+  <span class="material-symbols-outlined text-primary text-2xl">check_circle</span>
+  <div>
+    <p class="font-serif text-lg font-bold">Opération Réussie</p>
+    <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest">{{ successMessage() }}</p>
   </div>
+</div>
 }
 
 <!-- Luxury Error Toast -->
 @if (errorMessage()) {
-  <div class="fixed bottom-12 right-12 bg-red-600 text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-white/10">
-    <span class="material-symbols-outlined text-white text-2xl">error</span>
-    <div>
-      <p class="font-serif text-lg font-bold">Action Interrompue</p>
-      <p class="text-[9px] font-bold text-white/80 uppercase tracking-widest">{{ errorMessage() }}</p>
-    </div>
+<div
+  class="fixed bottom-12 right-12 bg-red-600 text-white px-10 py-5 rounded-[25px] shadow-luxury z-[300] reveal-up flex items-center gap-4 border border-white/10">
+  <span class="material-symbols-outlined text-white text-2xl">error</span>
+  <div>
+    <p class="font-serif text-lg font-bold">Action Interrompue</p>
+    <p class="text-[9px] font-bold text-white/80 uppercase tracking-widest">{{ errorMessage() }}</p>
   </div>
+</div>
 }
 
 <!-- Custom Deletion Confirmation Overlay -->
 @if (confirmingDelete()) {
-  <div class="fixed inset-0 bg-secondary/80 backdrop-blur-sm z-[400] flex items-center justify-center p-6">
-    <div class="bg-white rounded-[40px] shadow-luxury p-10 lg:p-16 max-w-xl w-full reveal-up border border-primary/5">
-      <div class="flex items-center gap-6 mb-10 text-red-600">
-        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
-          <span class="material-symbols-outlined text-4xl">warning</span>
-        </div>
-        <div>
-          <h3 class="font-serif text-2xl font-bold">Action Irréversible</h3>
-          <p class="text-[9px] font-black uppercase tracking-widest opacity-60">Protocole de Suppression</p>
-        </div>
+<div class="fixed inset-0 bg-secondary/80 backdrop-blur-sm z-[400] flex items-center justify-center p-6">
+  <div class="bg-white rounded-[40px] shadow-luxury p-10 lg:p-16 max-w-xl w-full reveal-up border border-primary/5">
+    <div class="flex items-center gap-6 mb-10 text-red-600">
+      <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl">warning</span>
       </div>
-      
-      <p class="text-secondary text-lg leading-relaxed mb-12">
-        Êtes-vous certain de vouloir retirer <span class="font-bold text-primary font-serif italic">"{{ confirmingDelete()?.nom }}"</span> du registre impérial ? Cette action est définitive.
-      </p>
-
-      <div class="flex gap-4">
-        <button (click)="cancelDelete()" class="btn-luxury-secondary flex-1">
-          Annuler
-        </button>
-        <button (click)="confirmDelete()" class="btn-luxury-primary flex-1 !bg-red-600 !border-red-600 hover:!bg-red-700">
-          Supprimer Définitivement
-        </button>
+      <div>
+        <h3 class="font-serif text-2xl font-bold">Action Irréversible</h3>
+        <p class="text-[9px] font-black uppercase tracking-widest opacity-60">Protocole de Suppression</p>
       </div>
     </div>
+
+    <p class="text-secondary text-lg leading-relaxed mb-12">
+      Êtes-vous certain de vouloir retirer <span class="font-bold text-primary font-serif italic">"{{
+        confirmingDelete()?.nom }}"</span> du registre impérial ? Cette action est définitive.
+    </p>
+
+    <div class="flex gap-4">
+      <button (click)="cancelDelete()" class="btn-luxury-secondary flex-1">
+        Annuler
+      </button>
+      <button (click)="confirmDelete()" class="btn-luxury-primary flex-1 !bg-red-600 !border-red-600 hover:!bg-red-700">
+        Supprimer Définitivement
+      </button>
+    </div>
   </div>
+</div>
 }

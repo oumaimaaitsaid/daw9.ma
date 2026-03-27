@@ -20,9 +20,9 @@ import { LogoComponent } from '../../shared/components/logo/logo.component';
       <aside class="fixed top-0 left-0 bottom-0 w-72 bg-[#1A1A1A] border-r border-[#D4AF37]/10 flex flex-col z-50 shadow-2xl overflow-hidden scroll-hidden">
         
         <!-- Logo Area -->
-        <div class="h-24 flex items-center px-8 bg-black/20 border-b border-[#D4AF37]/10">
-          <a routerLink="/admin/dashboard" class="flex items-center">
-             <app-logo [size]="50" variant="dark"></app-logo>
+        <div class="h-28 flex items-center px-8 bg-black/20 border-b border-[#D4AF37]/10">
+          <a routerLink="/admin/dashboard" class="flex items-center w-full justify-center">
+             <app-logo [size]="60" variant="dark" [showTagline]="false"></app-logo>
           </a>
         </div>
 
@@ -32,7 +32,7 @@ import { LogoComponent } from '../../shared/components/logo/logo.component';
           <a routerLink="/admin/dashboard" routerLinkActive="bg-[#D4AF37]/10 text-[#D4AF37]" [routerLinkActiveOptions]="{exact: true}"
              class="flex items-center space-x-4 px-5 py-4 text-white/70 hover:bg-white/5 hover:text-white rounded-2xl transition-all duration-300 group">
             <span class="material-symbols-outlined text-xl group-hover:-translate-y-1 transition-transform">dashboard</span>
-            <span class="font-serif text-lg tracking-wide">Tableau de Bord</span>
+            <span class="font-serif text-[13px] uppercase tracking-[0.2em] font-bold">Tableau de Bord</span>
           </a>
 
           <!-- CATEGORY: NEGAFA -->
@@ -115,14 +115,14 @@ import { LogoComponent } from '../../shared/components/logo/logo.component';
                class="flex items-center space-x-4 px-5 py-4 text-white/70 hover:bg-white/5 hover:text-white rounded-2xl transition-all duration-300 group relative">
               <span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-[#D4AF37] rounded-r transition-all group-hover:h-8"></span>
               <span class="material-symbols-outlined text-xl">event_available</span>
-              <span class="font-serif text-lg tracking-wide">Réservations</span>
+              <span class="font-serif text-[13px] uppercase tracking-[0.2em] font-bold">Réservations</span>
             </a>
             
             <a routerLink="/admin/clients" routerLinkActive="bg-white/5 text-white"
                class="flex items-center space-x-4 px-5 py-4 text-white/70 hover:bg-white/5 hover:text-white rounded-2xl transition-all duration-300 group relative mt-2">
               <span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-[#D4AF37] rounded-r transition-all group-hover:h-8"></span>
               <span class="material-symbols-outlined text-xl">group</span>
-              <span class="font-serif text-lg tracking-wide">Clients VIP</span>
+              <span class="font-serif text-[13px] uppercase tracking-[0.2em] font-bold">Clients VIP</span>
             </a>
           </div>
         </nav>

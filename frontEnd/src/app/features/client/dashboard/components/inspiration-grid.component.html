@@ -28,7 +28,7 @@
                 <div class="group relative bg-white min-h-[100px] rounded-3xl overflow-hidden border border-primary/5 shadow-premium">
                   <div class="flex">
                     <div class="w-28 relative overflow-hidden h-28">
-                      <img [src]="local.url" loading="lazy" class="w-full h-full object-cover">
+                      <img [src]="local.url" class="w-full h-full object-cover">
                       <div class="absolute inset-0 bg-secondary/40 backdrop-blur-[2px] flex items-center justify-center">
                         <div class="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                       </div>
@@ -60,7 +60,7 @@
                   <div class="group relative bg-white min-h-[100px] rounded-3xl overflow-hidden border border-primary/5 shadow-premium hover:shadow-2xl hover:shadow-secondary/5 transition-all duration-500 hover:-translate-y-1">
                     <div class="flex">
                       <div class="w-28 relative overflow-hidden h-28">
-                        <img [src]="(img.imageUrl.startsWith('http') ? '' : serverUrl) + (img.imageUrl.startsWith('/') ? '' : '/') + img.imageUrl" loading="lazy"
+                        <img [src]="(img.imageUrl.startsWith('http') ? '' : serverUrl) + (img.imageUrl.startsWith('/') ? '' : '/') + img.imageUrl"
                              (click)="onZoom.emit(img)"
                              class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-700">
                          <div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
@@ -107,7 +107,7 @@
                 <div class="group relative bg-white/60 min-h-[100px] rounded-3xl overflow-hidden border border-dashed border-primary/20 shadow-sm transition-all duration-500">
                   <div class="flex">
                     <div class="w-28 relative overflow-hidden h-28">
-                      <img [src]="(img.imageUrl.startsWith('http') ? '' : serverUrl) + (img.imageUrl.startsWith('/') ? '' : '/') + img.imageUrl" loading="lazy"
+                      <img [src]="(img.imageUrl.startsWith('http') ? '' : serverUrl) + (img.imageUrl.startsWith('/') ? '' : '/') + img.imageUrl"
                            class="w-full h-full object-cover opacity-60">
                        <div class="absolute inset-0 flex items-center justify-center">
                          @if (img.analysisStatus === 'PENDING') {

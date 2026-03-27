@@ -29,7 +29,7 @@ public class NotificationService {
             notificationRepository.dropTypeConstraint();
             log.info("✅ Contraintes synchronisées.");
         } catch (Exception e) {
-            log.warn("ℹ️ La synchronisation automatique a échoué ou était déjà effectuée (PostgreSQL constraint).");
+            log.warn("ℹ️ La synchronisation automatique a échoué (PostgreSQL constraint or unique violation).");
         }
     }
 

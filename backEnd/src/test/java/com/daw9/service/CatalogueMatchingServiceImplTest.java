@@ -1,7 +1,7 @@
 package com.daw9.service;
 
 import com.daw9.model.*;
-import com.daw9.model.enums.StyleType;
+import com.daw9.model.enums.*;
 import com.daw9.repository.CatalogueItemRepository;
 import com.daw9.repository.MoodboardImageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,10 +52,13 @@ class CatalogueMatchingServiceImplTest {
         MoodboardImage img = new MoodboardImage();
         img.setSousCategorie("caftan");
         img.setCouleurDominante("Rouge");
-        img.setStyle(StyleType.TRADITIONNEL);
-        img.setPalette(com.daw9.model.enums.PaletteType.COLORE);
-        img.setAmbiance(com.daw9.model.enums.AmbianceType.ELEGANT);
-        img.setBudgetPercu(com.daw9.model.enums.BudgetType.PREMIUM);
+
+        StyleProfile sp = new StyleProfile();
+        sp.setStyle(StyleType.TRADITIONNEL);
+        sp.setPalette(PaletteType.COLORE);
+        sp.setAmbiance(AmbianceType.ELEGANT);
+        sp.setBudgetPercu(BudgetType.PREMIUM);
+        img.setStyleProfile(sp);
 
         when(moodboardRepo.findByClientId(clientId)).thenReturn(List.of(img));
 
@@ -64,7 +67,9 @@ class CatalogueMatchingServiceImplTest {
         item1.setNom("Caftan Royal");
         item1.setSousCategorie("caftan");
         item1.setCouleurDominante("Rouge");
-        item1.setStyle(StyleType.TRADITIONNEL);
+        StyleProfile itemSp1 = new StyleProfile();
+        itemSp1.setStyle(StyleType.TRADITIONNEL);
+        item1.setStyleProfile(itemSp1);
 
         CatalogueItem item2 = new CatalogueItem();
         item2.setNom("Takchita Bleue");

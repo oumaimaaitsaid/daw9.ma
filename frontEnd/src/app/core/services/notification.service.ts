@@ -22,6 +22,10 @@ export class NotificationService {
     return this.http.get<any[]>(`${environment.apiUrl}/notifications/user/${userId}`);
   }
 
+  getRecentActivity() {
+    return this.http.get<any[]>(`${environment.apiUrl}/notifications/all`);
+  }
+
   // WebSocket Connection
   connectWebSocket(userId: number) {
 
