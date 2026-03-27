@@ -22,7 +22,9 @@
             <div class="space-y-10">
               <div class="space-y-4">
                 <label class="label-luxury">Désignation du Trésor</label>
-                <input type="text" [(ngModel)]="currentItem().nom" name="nom" required class="input-luxury">
+                <input type="text" [(ngModel)]="currentItem().nom" name="nom" required 
+                       [class.border-red-400]="!currentItem().nom"
+                       class="input-luxury">
               </div>
 
               <div class="space-y-4">
@@ -38,7 +40,9 @@
               } @else {
                 <div class="space-y-4">
                   <label class="label-luxury">Investissement Requis (MAD)</label>
-                  <input type="number" [(ngModel)]="currentItem().prix" name="prix" required class="input-luxury">
+                  <input type="number" [(ngModel)]="currentItem().prix" name="prix" required 
+                         [class.border-red-400]="!currentItem().prix"
+                         class="input-luxury">
                 </div>
               }
             </div>
@@ -170,7 +174,7 @@
                 <button type="button" (click)="onClose.emit()" class="btn-luxury-secondary">
                   Annuler
                 </button>
-                <button type="submit" [disabled]="saving()" class="btn-luxury-primary group">
+                <button type="submit" [disabled]="saving() || !currentItem().nom || (!currentItem().prix && !currentItem().prixParPersonne)" class="btn-luxury-primary group">
                   @if (saving()) {
                     <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                   }
