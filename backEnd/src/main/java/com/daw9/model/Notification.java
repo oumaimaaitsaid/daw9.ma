@@ -3,6 +3,7 @@ package com.daw9.model;
 import com.daw9.model.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -33,7 +34,7 @@ public class Notification {
     private Boolean isRead = false;
 
     @Column(name = "created_at")
-    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     public static Notification createForClient(User user, NotificationType type, String titre, String message) {
         Notification notif = new Notification();

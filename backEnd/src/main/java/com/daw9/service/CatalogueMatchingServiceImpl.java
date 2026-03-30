@@ -20,6 +20,7 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
 
     private final CatalogueItemRepository catalogueItemRepository;
     private final MoodboardImageRepository moodboardRepo;
+    private final com.daw9.mapper.CatalogueMapper catalogueMapper;
 
     private static final Set<String> TENUES_SOUS_CATEGORIES = Set.of(
             "caftan", "takchita", "lebsa", "robe-moderne", "jabador", "costume");
@@ -36,9 +37,9 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
             "blanc", List.of("blanc", "creme", "ivoire", "beige", "sable")
     );
 
-    public Map<String, Object> getSuggestions(Long clientId) {
+    public Map<String, List<com.daw9.dto.CatalogueItemDTO>> getSuggestions(Long clientId) {
         List<MoodboardImage> images = moodboardRepo.findByClientId(clientId);
-        Map<String, Object> result = new HashMap<>();
+        Map<String, List<com.daw9.dto.CatalogueItemDTO>> result = new HashMap<>();
 
         if (images.isEmpty()) {
             log.info("Aucune image dans le moodboard du client {}", clientId);
@@ -63,7 +64,12 @@ public class CatalogueMatchingServiceImpl implements CatalogueMatchingService {
             // Matcher en utilisant le profil spécifique ou le profil global del client
             List<CatalogueItem> items = findMatchingItems(sousCategorie, imagesForSousCategorie.get(0).getCategorie(),
                     couleurClient, subProfile);
-            result.put(sousCategorie, items);
+            
+            List<com.daw9.dto.CatalogueItemDTO> dtos = items.stream()
+                    .map(catalogueMapper::toDTO)
+                    .collect(Collectors.toList());
+            
+            result.put(sousCategorie, dtos);
 
             log.info("Matching '{}': {} articles trouvés (couleur={}, profile={})",
                     sousCategorie, items.size(), couleurClient, subProfile != null ? "SPECIFIC" : "NONE");

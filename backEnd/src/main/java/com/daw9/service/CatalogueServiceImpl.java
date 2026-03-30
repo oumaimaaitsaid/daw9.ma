@@ -40,7 +40,8 @@ public class CatalogueServiceImpl implements CatalogueService {
     }
 
     @Override
-    public Page<CatalogueItem> findByCategorieAndSousCategorie(String categorie, String sousCategorie, Pageable pageable) {
+    public Page<CatalogueItem> findByCategorieAndSousCategorie(String categorie, String sousCategorie,
+            Pageable pageable) {
         return repository.findByCategorieAndSousCategorie(categorie, sousCategorie, pageable);
     }
 
@@ -62,13 +63,12 @@ public class CatalogueServiceImpl implements CatalogueService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        // Check for future reservations
         long activeCount = reservationRepository.countFutureReservationsByItemId(id, LocalDate.now());
         if (activeCount > 0) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, 
-                "Impossible de supprimer cet article : il est lié à " + activeCount + " réservation(s) future(s).");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Impossible de supprimer cet article : il est lié à " + activeCount + " réservation(s) future(s).");
         }
-        
+
         repository.deleteFromReservationItems(id);
         repository.deleteById(id);
     }

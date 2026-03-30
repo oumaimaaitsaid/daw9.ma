@@ -26,6 +26,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.daw9.mapper.UserMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
@@ -42,6 +43,8 @@ class AuthServiceImplTest {
     private AuthenticationManager authenticationManager;
     @Mock
     private UserDetailsService userDetailsService;
+    @Mock
+    private UserMapper userMapper;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -68,6 +71,11 @@ class AuthServiceImplTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         when(userDetailsService.loadUserByUsername("test@example.com")).thenReturn(userDetails);
         when(tokenService.generateToken(userDetails, "CLIENT")).thenReturn("mock-token");
+        
+        AuthResponse mockResponse = new AuthResponse();
+        mockResponse.setEmail("test@example.com");
+        mockResponse.setRole("CLIENT");
+        when(userMapper.toAuthResponse(any(User.class))).thenReturn(mockResponse);
 
         AuthResponse response = authService.login(req);
 
@@ -92,6 +100,13 @@ class AuthServiceImplTest {
         when(passwordEncoder.encode("password")).thenReturn("encoded-password");
         when(userDetailsService.loadUserByUsername("new@example.com")).thenReturn(userDetails);
         when(tokenService.generateToken(userDetails, "CLIENT")).thenReturn("new-token");
+        
+        Client mockClient = new Client();
+        mockClient.setEmail("new@example.com");
+        when(userMapper.toEntity(any(RegisterClientRequest.class))).thenReturn(mockClient);
+        
+        AuthResponse mockResponse = new AuthResponse();
+        when(userMapper.toAuthResponse(any(Client.class))).thenReturn(mockResponse);
 
         AuthResponse response = authService.registerClient(req);
 

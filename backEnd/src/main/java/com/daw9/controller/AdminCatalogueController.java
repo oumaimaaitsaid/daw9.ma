@@ -1,5 +1,6 @@
 package com.daw9.controller;
 
+import com.daw9.dto.CatalogueItemDTO;
 import com.daw9.model.CatalogueItem;
 import com.daw9.service.CatalogueService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,32 +29,34 @@ public class AdminCatalogueController {
 
     private final CatalogueService catalogueService;
     private final ObjectMapper objectMapper;
+    private final com.daw9.mapper.CatalogueMapper catalogueMapper;
 
     private static final String UPLOAD_DIR = "uploads/catalogue/";
 
     @GetMapping("/{categorie}")
-    public ResponseEntity<Page<CatalogueItem>> getByCategorie(@PathVariable("categorie") String categorie, Pageable pageable) {
+    public ResponseEntity<Page<CatalogueItemDTO>> getByCategorie(@PathVariable("categorie") String categorie, Pageable pageable) {
         log.info("Fetching items for category: {}", categorie);
         Page<CatalogueItem> items = catalogueService.findByCategorie(categorie, pageable);
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(items.map(catalogueMapper::toDTO));
     }
 
     @GetMapping("/{categorie}/{sousCategorie}")
-    public ResponseEntity<Page<CatalogueItem>> getItems(
+    public ResponseEntity<Page<CatalogueItemDTO>> getItems(
             @PathVariable("categorie") String categorie,
             @PathVariable("sousCategorie") String sousCategorie,
             Pageable pageable) {
         Page<CatalogueItem> items = catalogueService
                 .findByCategorieAndSousCategorie(categorie, sousCategorie, pageable);
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(items.map(catalogueMapper::toDTO));
     }
 
     @GetMapping("/{categorie}/{sousCategorie}/{id}")
-    public ResponseEntity<CatalogueItem> getItem(
+    public ResponseEntity<CatalogueItemDTO> getItem(
             @PathVariable("categorie") String categorie,
             @PathVariable("sousCategorie") String sousCategorie,
             @PathVariable("id") Long id) {
         return catalogueService.findById(id)
+                .map(catalogueMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

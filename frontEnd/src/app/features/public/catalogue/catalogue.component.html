@@ -1,0 +1,175 @@
+<div class="h-full flex flex-col bg-background font-sans pt-24">
+  
+  <!-- Header Premium -->
+  <div class="bg-white/80 backdrop-blur-md border-b border-primary/5 relative z-40">
+    <div class="max-w-[1600px] mx-auto px-4 md:px-8 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="reveal">
+        <h1 class="font-serif text-3xl font-bold text-secondary flex items-center gap-3">
+          Vitrine <span class="text-primary italic font-medium text-2xl lowercase font-sans">Privilège</span>
+        </h1>
+        <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em] mt-1">
+          Explorez nos collections d'exception
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boutique Catalogue View -->
+  <div class="flex-1 flex overflow-hidden bg-background">
+    <!-- Luxury Sidebar -->
+    <div class="w-80 bg-white/40 backdrop-blur-lg border-r border-primary/5 overflow-y-auto flex-shrink-0 scroll-hidden selection:bg-primary/10 hidden md:block">
+      <div class="p-8 border-b border-primary/5">
+        <h3 class="font-serif text-xl font-bold text-secondary uppercase tracking-tight">Collections</h3>
+        <p class="text-[9px] font-bold text-primary uppercase tracking-[0.3em] mt-1 italic">Daw9.ma</p>
+      </div>
+      <nav class="p-6 space-y-4">
+
+        <!-- ===== NEGAFA ===== -->
+        <div class="reveal">
+          <button (click)="toggleSection('negafa')" class="w-full flex items-center justify-between px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all duration-500 shadow-sm group">
+            <span class="font-serif text-base font-bold text-secondary group-hover:text-primary transition-colors">Maïtres Negafa</span>
+            <span class="material-symbols-outlined text-sm text-primary transition-transform duration-500" [class.rotate-180]="expandedSections.negafa">expand_more</span>
+          </button>
+          @if (expandedSections.negafa) {
+          <div class="ml-4 mt-4 space-y-2 border-l-2 border-primary/10 pl-6 reveal">
+            <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mb-3 opacity-60">Tenues Mariée</p>
+            <button (click)="loadItemsByCategory('caftan', 'negafa')" [class]="selectedSousCategorie === 'caftan' ? 'nav-item-active' : 'nav-item'">Caftan Royal</button>
+            <button (click)="loadItemsByCategory('takchita', 'negafa')" [class]="selectedSousCategorie === 'takchita' ? 'nav-item-active' : 'nav-item'">Takchita Haute Couture</button>
+            <button (click)="loadItemsByCategory('lebsa', 'negafa')" [class]="selectedSousCategorie === 'lebsa' ? 'nav-item-active' : 'nav-item'">Lebsa Traditionnelle</button>
+            <button (click)="loadItemsByCategory('robe-moderne', 'negafa')" [class]="selectedSousCategorie === 'robe-moderne' ? 'nav-item-active' : 'nav-item'">Robe de Gala</button>
+            <p class="text-[9px] font-black text-text-muted uppercase tracking-widest mt-6 mb-3 opacity-60">Accessoires</p>
+            <button (click)="loadItemsByCategory('bijoux', 'negafa')" [class]="selectedSousCategorie === 'bijoux' ? 'nav-item-active' : 'nav-item'">Parures & Joyaux</button>
+            <button (click)="loadItemsByCategory('amariya', 'negafa')" [class]="selectedSousCategorie === 'amariya' ? 'nav-item-active' : 'nav-item'">Amariya Royale</button>
+          </div>
+          }
+        </div>
+
+        <!-- ===== ZIANA ===== -->
+        <button (click)="loadCategoryFull('ziana')" [class]="selectedCategorie === 'ziana' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
+          <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'ziana'">Ziana & Beauté</span>
+        </button>
+
+        <!-- ===== TRAITEUR ===== -->
+        <div class="reveal">
+          <button (click)="toggleSection('traiteur')" class="w-full flex items-center justify-between px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all duration-500 shadow-sm group">
+            <span class="font-serif text-base font-bold text-secondary group-hover:text-primary transition-colors">Gastronomie</span>
+            <span class="material-symbols-outlined text-sm text-primary transition-transform duration-500" [class.rotate-180]="expandedSections.traiteur">expand_more</span>
+          </button>
+          @if (expandedSections.traiteur) {
+          <div class="ml-4 mt-4 space-y-2 border-l-2 border-primary/10 pl-6 reveal">
+            <button (click)="loadItemsByCategory('entrees', 'traiteur')" [class]="selectedSousCategorie === 'entrees' ? 'nav-item-active' : 'nav-item'">Entrées Gourmandes</button>
+            <button (click)="loadItemsByCategory('plats-principaux', 'traiteur')" [class]="selectedSousCategorie === 'plats-principaux' ? 'nav-item-active' : 'nav-item'">Plats de Signature</button>
+            <button (click)="loadItemsByCategory('patisseries', 'traiteur')" [class]="selectedSousCategorie === 'patisseries' ? 'nav-item-active' : 'nav-item'">Pâtisseries Fines</button>
+            <button (click)="loadItemsByCategory('gateau-mariage', 'traiteur')" [class]="selectedSousCategorie === 'gateau-mariage' ? 'nav-item-active' : 'nav-item'">Pièce Montée</button>
+          </div>
+          }
+        </div>
+
+        <!-- ===== PHOTOGRAPHE ===== -->
+        <button (click)="loadCategoryFull('photographe')" [class]="selectedCategorie === 'photographe' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
+          <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'photographe'">Art Visuel</span>
+        </button>
+
+        <!-- ===== DJ ===== -->
+        <button (click)="loadCategoryFull('dj')" [class]="selectedCategorie === 'dj' ? 'w-full flex items-center px-6 py-4 bg-secondary text-white rounded-3xl reveal' : 'w-full flex items-center px-6 py-4 bg-white rounded-3xl border border-primary/5 hover:border-primary transition-all reveal shadow-sm group'">
+          <span class="font-serif text-base font-bold group-hover:text-primary transition-colors" [class.text-white]="selectedCategorie === 'dj'">Ambiance & DJ</span>
+        </button>
+
+      </nav>
+    </div>
+
+    <!-- Catalogue Discovery Grid -->
+    <div class="flex-1 bg-[#FBFBF9] overflow-y-auto px-4 md:px-10 py-12 scroll-hidden">
+      @if (loadingCatalogue) {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 reveal">
+        @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="bg-white rounded-[40px] p-6 border border-primary/5 space-y-4">
+          <app-skeleton width="100%" height="250px" borderRadius="32px"></app-skeleton>
+          <app-skeleton width="60%" height="20px"></app-skeleton>
+          <app-skeleton width="40%" height="12px"></app-skeleton>
+          <div class="flex justify-between items-center pt-4">
+            <app-skeleton width="80px" height="24px"></app-skeleton>
+            <app-skeleton width="40px" height="40px" [circle]="true"></app-skeleton>
+          </div>
+        </div>
+        }
+      </div>
+      } @else if (catalogueItems.length === 0) {
+      <app-empty-state icon="search_off" title="Explorez nos Collections" description="Aucune pièce ne correspond à votre sélection pour le moment.">
+      </app-empty-state>
+      } @else {
+      <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 reveal">
+        <div>
+          <h2 class="font-serif text-4xl font-bold text-secondary flex items-baseline gap-4">
+            {{ getCategorieLabel(selectedCategorie) }}
+            <span class="text-primary text-xl font-normal italic font-sans" *ngIf="selectedSousCategorie">
+              {{ getSousCategorieLabel(selectedSousCategorie) }}
+            </span>
+          </h2>
+          <div class="flex items-center gap-4 mt-2">
+            <div class="w-12 h-[1px] bg-primary"></div>
+            <p class="text-[10px] font-bold text-text-muted uppercase tracking-[0.4em]">{{ getSortedCatalogueItems().length }} pièces disponibles</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-primary/5 shadow-sm">
+          <span class="text-[9px] font-black text-text-muted uppercase tracking-[0.3em]">Trier par</span>
+          <select (change)="setSort($any($event.target).value)" class="bg-transparent text-[10px] font-bold text-secondary uppercase tracking-widest outline-none cursor-pointer">
+            <option value="none">Par défaut</option>
+            <option value="asc">Prix : Croissant</option>
+            <option value="desc">Prix : Décroissant</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        @for (item of getSortedCatalogueItems(); track item.id) {
+        <div class="group bg-white rounded-[40px] shadow-premium hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-700 reveal p-3 border border-primary/5">
+          <div class="relative aspect-[4/5] rounded-[32px] overflow-hidden mb-6">
+            @if (item.images && item.images.length > 0) {
+            <img [src]="getImageUrl(item.images[0])" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 cursor-pointer" (click)="zoomCatalogueItem(item)">
+            } @else {
+            <div class="w-full h-full bg-background flex items-center justify-center italic text-text-muted">No Image</div>
+            }
+            <div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+
+            <button (click)="reserveItem(item)" class="absolute bottom-6 right-6 px-6 py-3 bg-white text-secondary rounded-full flex items-center justify-center gap-2 shadow-2xl hover:bg-primary hover:text-white transition-all duration-500 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 scale-90 hover:scale-100 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">lock_open</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest cursor-pointer">Choisir</span>
+            </button>
+          </div>
+
+          <div class="px-5 pb-5">
+            <p class="text-[9px] font-black text-primary uppercase tracking-[0.2em] mb-2">{{ formatSousCategorie(item.sousCategorie || item.categoryKey || '') }}</p>
+            <h3 class="font-serif text-xl font-bold text-secondary mb-2 group-hover:text-primary transition-colors leading-tight">{{ item.nom }}</h3>
+            <p class="text-[11px] text-text-muted line-clamp-2 mb-6 font-medium leading-relaxed">{{ item.description }}</p>
+            <div class="flex items-center justify-between border-t border-primary/5 pt-4">
+              <span class="font-serif text-lg font-bold text-secondary">
+                {{ item.prixParPersonne ? item.prixParPersonne : item.prix }} <span class="text-xs font-sans text-primary">MAD</span>
+                <span class="text-[9px] font-bold text-text-muted" *ngIf="item.prixParPersonne"> / PERS</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Luxury Zoom Modal -->
+@if (zoomedImage) {
+<div class="fixed inset-0 bg-secondary/95 backdrop-blur-2xl flex items-center justify-center z-[10000] p-8 reveal" (click)="closeZoom()">
+  <div class="relative max-w-6xl max-h-[90vh] reveal-scale" (click)="$event.stopPropagation()">
+    <button (click)="closeZoom()" class="absolute -top-16 right-0 text-white/50 hover:text-white transition-all">
+      <span class="material-symbols-outlined text-4xl">close</span>
+    </button>
+    <img [src]="getImageUrl(zoomedImage.imageUrl)" loading="lazy" class="max-w-full max-h-[85vh] object-contain rounded-[40px] shadow-luxury border-4 border-white/5">
+    <div class="absolute -bottom-16 left-0 right-0 text-center">
+      <p class="font-serif text-2xl font-bold text-white mb-1">{{ formatSousCategorie(zoomedImage.sousCategorie || '') }}</p>
+      <p class="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">{{ zoomedImage.categorie }} Collection</p>
+    </div>
+  </div>
+</div>
+}

@@ -8,7 +8,6 @@ import com.daw9.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.PostConstruct;
@@ -21,32 +20,33 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
+    private final com.daw9.mapper.NotificationMapper notificationMapper;
 
     @PostConstruct
     public void init() {
         try {
-            log.info("🛠️ Synchronisation de la base de données : suppression des contraintes Enums obsolètes...");
+            log.info(" Synchronisation de la base de données : suppression des contraintes Enums obsolètes...");
             notificationRepository.dropTypeConstraint();
-            log.info("✅ Contraintes synchronisées.");
+            log.info(" Contraintes synchronisées.");
         } catch (Exception e) {
-            log.warn("ℹ️ La synchronisation automatique a échoué (PostgreSQL constraint or unique violation).");
+            log.warn("ℹLa synchronisation automatique a échoué (PostgreSQL constraint or unique violation).");
         }
     }
 
-    public List<Notification> getNotificationsByUserId(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    public java.util.List<com.daw9.dto.NotificationDTO> getNotificationsByUserId(Long userId) {
+        return notificationMapper.toDTOList(notificationRepository.findByUserIdOrderByCreatedAtDesc(userId));
     }
 
     @Transactional
     public void createNotification(String titre, String message, Long userId, NotificationType type) {
-        log.info("🔔 Tentative de création de notification: '{}' pour l'utilisateur ID: {}", titre,
+        log.info(" Tentative de création de notification: '{}' pour l'utilisateur ID: {}", titre,
                 userId != null ? userId : 1);
 
         User user = (userId == null) ? userRepository.findById(1L).orElse(null)
                 : userRepository.findById(userId).orElse(null);
 
         if (user == null) {
-            log.warn("⚠️ Notification annulée : Utilisateur ID {} introuvable en base.", userId != null ? userId : 1);
+            log.warn(" Notification annulée : Utilisateur ID {} introuvable en base.", userId != null ? userId : 1);
             return;
         }
 
@@ -60,10 +60,10 @@ public class NotificationService {
 
         try {
             Notification saved = notificationRepository.save(notif);
-            log.info("✅ Notification enregistrée avec succès (ID: {})", saved.getId());
+            log.info(" Notification enregistrée avec succès (ID: {})", saved.getId());
             messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), saved);
         } catch (Exception e) {
-            log.error("❌ ERREUR SQL CRITIQUE lors de la sauvegarde de la notification: {}", e.getMessage());
+            log.error("ERREUR SQL CRITIQUE lors de la sauvegarde de la notification: {}", e.getMessage());
 
             throw e;
         }

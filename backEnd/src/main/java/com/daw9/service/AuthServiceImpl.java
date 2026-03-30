@@ -4,6 +4,7 @@ import com.daw9.dto.*;
 import com.daw9.model.Client;
 import com.daw9.model.User;
 import com.daw9.model.enums.Role;
+import com.daw9.mapper.UserMapper;
 import com.daw9.repository.ClientRepository;
 import com.daw9.repository.UserRepository;
 import com.daw9.security.TokenService;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,30 +29,24 @@ public class AuthServiceImpl implements AuthService {
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final UserMapper userMapper;
 
     @Override
     public AuthResponse login(AuthRequest req) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
 
         User user = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new BadCredentialsException("Email ou mot de passe incorrect"));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
         String token = tokenService.generateToken(userDetails, user.getRole().name());
 
-        log.info("Login réussi pour: {}", req.getEmail());
+        AuthResponse response = userMapper.toAuthResponse(user);
+        response.setToken(token);
 
-        return new AuthResponse(
-                token,
-                user.getRole().name(),
-                user.getId(),
-                user.getEmail(),
-                user.getNom(),
-                user.getPrenom(),
-                user.isActive()
-        );
+        log.info("Login réussi pour: {}", req.getEmail());
+        return response;
     }
 
     @Override
@@ -59,16 +55,8 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Email déjà utilisé");
         }
 
-        Client client = new Client();
-        client.setEmail(req.getEmail());
+        Client client = userMapper.toEntity(req);
         client.setPassword(passwordEncoder.encode(req.getPassword()));
-        client.setNom(req.getNom());
-        client.setPrenom(req.getPrenom());
-        client.setPhone(req.getPhone());
-        client.setVille(req.getVille());
-        client.setBudget(req.getBudget());
-        client.setDateMarriage(req.getDateMarriage());
-        client.setRole(Role.CLIENT);
 
         clientRepository.save(client);
 
@@ -77,14 +65,9 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
         String token = tokenService.generateToken(userDetails, Role.CLIENT.name());
 
-        return new AuthResponse(
-                token,
-                Role.CLIENT.name(),
-                client.getId(),
-                client.getEmail(),
-                client.getNom(),
-                client.getPrenom(),
-                client.isActive()
-        );
+        AuthResponse response = userMapper.toAuthResponse(client);
+        response.setToken(token);
+
+        return response;
     }
 }

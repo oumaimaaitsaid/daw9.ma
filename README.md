@@ -54,11 +54,14 @@
    mvn clean spring-boot:run
    ```
 
-### Lancement du Frontend
-1. Naviguer dans le dossier `frontEnd/`
-2. Installer les dépendances : `npm install`
-3. Lancer le serveur de développement : `npm start`
-4. Accéder à l'application via `http://localhost:4200`
+### Lancement avec Docker (Recommandé 🐳)
+Si vous avez Docker installé, vous pouvez lancer tout l'écosystème (DB, API, Front) en une seule commande :
+```bash
+docker-compose up --build
+```
+- **Frontend** : accessible sur `http://localhost:4200`
+- **Backend API** : accessible sur `http://localhost:8080`
+- **Base de données** : PostgreSQL interne.
 
 ---
 

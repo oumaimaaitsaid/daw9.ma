@@ -95,6 +95,11 @@ export const routes: Routes = [
     ]
   },
 
+  {
+    path: 'catalogues',
+    loadComponent: () => import('./features/public/catalogue/catalogue.component').then(m => m.PublicCatalogueComponent)
+  },
+
   { 
     path: '**', 
     loadComponent: () => import('./shared/components/not-found/not-found.component').then(m => m.NotFoundComponent) 

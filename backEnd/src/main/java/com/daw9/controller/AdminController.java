@@ -11,6 +11,7 @@ import com.daw9.repository.CatalogueItemRepository;
 import com.daw9.service.NotificationService;
 import com.daw9.service.DemandeReservationService;
 import com.daw9.dto.ReservationResponseDTO;
+import com.daw9.dto.ClientProfileDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +34,8 @@ public class AdminController {
     private final CatalogueItemRepository catalogueItemRepository;
     private final NotificationService notificationService;
     private final DemandeReservationService demandeReservationService;
+    private final com.daw9.mapper.ClientMapper clientMapper;
 
-    // Dashboard stats
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -45,18 +46,18 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    // Client management
     @GetMapping("/clients")
-    public ResponseEntity<Page<Client>> getClients(
+    public ResponseEntity<Page<ClientProfileDTO>> getClients(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(clientRepository.findAll(pageable));
+        return ResponseEntity.ok(clientRepository.findAll(pageable).map(clientMapper::toProfileDTO));
     }
 
     @GetMapping("/clients/{id}")
-    public ResponseEntity<Client> getClient(@PathVariable("id") Long id) {
+    public ResponseEntity<ClientProfileDTO> getClient(@PathVariable("id") Long id) {
         return clientRepository.findById(id)
+                .map(clientMapper::toProfileDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -80,7 +81,7 @@ public class AdminController {
 
                     String statusText = saved.isActive() ? "RÉACTIVÉ" : "SUSPENDU";
                     notificationService.createNotification(
-                            "🔒 Alerte Sécurité",
+                            " Alerte Sécurité",
                             "Le compte de " + saved.getPrenom() + " " + saved.getNom() + " a été " + statusText
                                     + " par un administrateur.",
                             1L,
@@ -92,7 +93,6 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Reservations (demandes)
     @GetMapping("/reservations")
     public ResponseEntity<Page<ReservationResponseDTO>> getAllReservations(
             @RequestParam(name = "page", defaultValue = "0") int page,

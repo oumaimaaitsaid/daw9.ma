@@ -4,7 +4,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Data
 public class ReservationResponseDTO {
@@ -15,10 +14,10 @@ public class ReservationResponseDTO {
     private String status;
     private String ville;
     private String message;
-    private Map<String, Object> client;
-    private List<Map<String, Object>> items;
+    private UserSummaryDTO client;
+    private List<CatalogueItemDTO> items;
 
-    private Map<String, Object> negafa;
-    private Map<String, Object> traiteur;
-    private Map<String, Object> photographe;
+    private CatalogueItemDTO negafa;
+    private CatalogueItemDTO traiteur;
+    private CatalogueItemDTO photographe;
 }

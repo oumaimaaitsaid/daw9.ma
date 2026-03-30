@@ -242,13 +242,24 @@ export class NavbarComponent {
   isUserMenuOpen = false;
   isMobileMenuOpen = false;
 
-  navLinks = [
-    { label: 'Inspiration', path: '/client/dashboard', queryParams: { tab: 'inspirations' } },
-    { label: 'Négafa', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'negafa' } },
-    { label: 'Traiteur', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'traiteur' } },
-    { label: 'Photographe', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'photographe' } },
-    { label: 'DJ', path: '/client/dashboard', queryParams: { tab: 'catalogue', category: 'dj' } }
-  ];
+  get navLinks() {
+    const isLogged = this.authService.isLoggedIn;
+
+    const links = [];
+    if (isLogged) {
+      links.push({ label: 'Inspiration', path: '/client/dashboard', queryParams: { tab: 'inspirations' } });
+    }
+
+    const catPath = isLogged ? '/client/dashboard' : '/catalogues';
+    const getCatParams = (cat: string) => isLogged ? { tab: 'catalogue', category: cat } : { category: cat };
+
+    links.push({ label: 'Négafa', path: catPath, queryParams: getCatParams('negafa') });
+    links.push({ label: 'Traiteur', path: catPath, queryParams: getCatParams('traiteur') });
+    links.push({ label: 'Photographe', path: catPath, queryParams: getCatParams('photographe') });
+    links.push({ label: 'DJ', path: catPath, queryParams: getCatParams('dj') });
+
+    return links;
+  }
 
   unreadCount$ = this.store.select(selectUnreadCount);
   notifications$ = this.store.select(selectNotifications);

@@ -1,7 +1,9 @@
 package com.daw9.controller;
 
+import com.daw9.dto.CatalogueItemDTO;
 import com.daw9.dto.ClientProfileDTO;
 import com.daw9.dto.ReservationResponseDTO;
+import com.daw9.dto.MoodboardImageDTO;
 import com.daw9.model.*;
 import com.daw9.repository.*;
 import com.daw9.service.FileStorageService;
@@ -51,13 +53,17 @@ public class ClientController {
     private final CatalogueService catalogueService;
     private final DemandeReservationService demandeReservationService;
     private final NotificationService notificationService;
+    private final com.daw9.mapper.ClientMapper clientMapper;
+    private final com.daw9.mapper.CatalogueMapper catalogueMapper;
+    private final com.daw9.mapper.ReservationMapper reservationMapper;
+    private final com.daw9.mapper.MoodboardMapper moodboardMapper;
 
     @Operation(summary = "Récupérer le profil client", description = "Retourne les informations du client connecté à partir du token JWT")
     @GetMapping("/profile")
     public ResponseEntity<ClientProfileDTO> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         Client client = clientRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé"));
-        return ResponseEntity.ok(ClientProfileDTO.fromEntity(client));
+        return ResponseEntity.ok(clientMapper.toProfileDTO(client));
     }
 
     @PutMapping("/profile")
@@ -77,33 +83,34 @@ public class ClientController {
             client.setDateMarriage(updateRequest.getDateMarriage());
 
         Client saved = clientRepository.save(client);
-        return ResponseEntity.ok(ClientProfileDTO.fromEntity(saved));
+        return ResponseEntity.ok(clientMapper.toProfileDTO(saved));
     }
 
     // ---- Moodboard ----
 
     @GetMapping("/moodboard")
-    public ResponseEntity<Page<MoodboardImage>> getMoodboard(
+    public ResponseEntity<Page<MoodboardImageDTO>> getMoodboard(
             @AuthenticationPrincipal UserDetails userDetails,
             Pageable pageable) {
         Client client = getClient(userDetails);
-        return ResponseEntity.ok(moodboardImageRepository.findByClientId(client.getId(), pageable));
+        Page<MoodboardImage> images = moodboardImageRepository.findByClientId(client.getId(), pageable);
+        return ResponseEntity.ok(images.map(moodboardMapper::toDTO));
     }
 
     @PostMapping("/moodboard/upload")
-    public ResponseEntity<MoodboardImage> uploadMoodboardImage(
+    public ResponseEntity<MoodboardImageDTO> uploadMoodboardImage(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam("file") MultipartFile file) {
 
         Client client = getClient(userDetails);
         MoodboardImage saved = persistImage(file, client);
         fireAnalysis(saved, file, client);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(moodboardMapper.toDTO(saved));
     }
 
     @Operation(summary = "Upload en masse d'images", description = "Enregistre plusieurs images pour le moodboard et lance l'analyse IA asynchrone")
     @PostMapping("/moodboard/upload-bulk")
-    public ResponseEntity<List<MoodboardImage>> uploadBulk(
+    public ResponseEntity<List<MoodboardImageDTO>> uploadBulk(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam("files") MultipartFile[] files) {
 
@@ -117,7 +124,7 @@ public class ClientController {
         }
 
         log.info("Bulk upload: {} images saved for client {}", saved.size(), client.getId());
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(moodboardMapper.toDTOList(saved));
     }
 
     @DeleteMapping("/moodboard/{imageId}")
@@ -141,34 +148,39 @@ public class ClientController {
     // ---- Suggestions & Catalogue ----
 
     @GetMapping("/suggestions")
-    public ResponseEntity<Map<String, Object>> getSuggestions(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Map<String, List<CatalogueItemDTO>>> getSuggestions(
+            @AuthenticationPrincipal UserDetails userDetails) {
         Client client = getClient(userDetails);
         return ResponseEntity.ok(catalogueMatchingService.getSuggestions(client.getId()));
     }
 
     @GetMapping("/catalogue")
-    public ResponseEntity<Page<CatalogueItem>> getAllCatalogue(Pageable pageable) {
-        return ResponseEntity.ok(catalogueService.findAll(pageable));
+    public ResponseEntity<Page<CatalogueItemDTO>> getAllCatalogue(Pageable pageable) {
+        Page<CatalogueItem> items = catalogueService.findAll(pageable);
+        return ResponseEntity.ok(items.map(catalogueMapper::toDTO));
     }
 
     @GetMapping("/catalogue/{categorie}")
-    public ResponseEntity<Page<CatalogueItem>> getCatalogueByCategorie(
+    public ResponseEntity<Page<CatalogueItemDTO>> getCatalogueByCategorie(
             @PathVariable("categorie") String categorie, Pageable pageable) {
-        return ResponseEntity.ok(catalogueService.findByCategorie(categorie, pageable));
+        Page<CatalogueItem> items = catalogueService.findByCategorie(categorie, pageable);
+        return ResponseEntity.ok(items.map(catalogueMapper::toDTO));
     }
 
     @GetMapping("/catalogue/{categorie}/{sousCategorie}")
-    public ResponseEntity<Page<CatalogueItem>> getCatalogueBySousCategorie(
+    public ResponseEntity<Page<CatalogueItemDTO>> getCatalogueBySousCategorie(
             @PathVariable("categorie") String categorie, @PathVariable("sousCategorie") String sousCategorie,
             Pageable pageable) {
-        return ResponseEntity.ok(catalogueService.findByCategorieAndSousCategorie(categorie, sousCategorie, pageable));
+        Page<CatalogueItem> items = catalogueService.findByCategorieAndSousCategorie(categorie, sousCategorie,
+                pageable);
+        return ResponseEntity.ok(items.map(catalogueMapper::toDTO));
     }
 
     // ---- Reservations ----
 
     @Operation(summary = "Créer une réservation", description = "Enregistre une nouvelle demande de réservation avec sélection d'articles")
     @PostMapping("/reservations")
-    public ResponseEntity<DemandeReservation> createReservation(
+    public ResponseEntity<ReservationResponseDTO> createReservation(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody ReservationRequest request) {
 
@@ -213,7 +225,7 @@ public class ClientController {
                 1L,
                 NotificationType.NOUVELLE_RESERVATION);
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(reservationMapper.toDTO(saved));
     }
 
     @GetMapping("/reservations")

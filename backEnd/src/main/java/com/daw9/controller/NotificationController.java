@@ -1,8 +1,9 @@
 package com.daw9.controller;
 
-import com.daw9.model.Notification;
 import com.daw9.repository.NotificationRepository;
 import com.daw9.service.NotificationService;
+import com.daw9.mapper.NotificationMapper;
+import com.daw9.dto.NotificationDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
+    private final NotificationMapper notificationMapper;
 
     @GetMapping("/unread-count/{userId}")
     public ResponseEntity<Long> getUnreadCount(@PathVariable("userId") Long userId) {
@@ -27,14 +29,14 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable("userId") Long userId) {
-        List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
-        return ResponseEntity.ok(notifications);
+    public ResponseEntity<List<NotificationDTO>> getUserNotifications(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok(notificationService.getNotificationsByUserId(userId));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Notification>> getAllNotifications() {
-        return ResponseEntity.ok(notificationRepository.findTop10ByOrderByCreatedAtDesc());
+    public ResponseEntity<List<NotificationDTO>> getAllNotifications() {
+        return ResponseEntity
+                .ok(notificationMapper.toDTOList(notificationRepository.findTop10ByOrderByCreatedAtDesc()));
     }
 
     @PutMapping("/{id}/read")

@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,9 +38,11 @@ public class ImageAnalysisService {
 
     // ------- Records -------
 
-    public record StyleAnalysisResult(StyleProfile styleProfile, String couleurDominante) {}
+    public record StyleAnalysisResult(StyleProfile styleProfile, String couleurDominante) {
+    }
 
-    public record ImageClassification(CategoriePrestataire categorie, String sousCategorie, int confidence) {}
+    public record ImageClassification(CategoriePrestataire categorie, String sousCategorie, int confidence) {
+    }
 
     // ------- Public API -------
 
@@ -66,7 +69,8 @@ public class ImageAnalysisService {
     }
 
     public StyleProfile calculateAverageProfile(List<StyleProfile> profiles) {
-        if (profiles == null || profiles.isEmpty()) return null;
+        if (profiles == null || profiles.isEmpty())
+            return null;
 
         Map<StyleType, Long> styles = count(profiles.stream().map(StyleProfile::getStyle).toList());
         Map<PaletteType, Long> palettes = count(profiles.stream().map(StyleProfile::getPalette).toList());
@@ -80,8 +84,6 @@ public class ImageAnalysisService {
         avg.setBudgetPercu(mostFrequent(budgets));
         return avg;
     }
-
-    // ------- Private helpers -------
 
     private String call(String body) throws Exception {
         HttpRequest req = HttpRequest.newBuilder()
@@ -100,7 +102,6 @@ public class ImageAnalysisService {
         return res.body();
     }
 
-    /** Builds payload using ObjectMapper — no manual escaping needed. */
     private String buildPayload(byte[] imageData, String prompt, int maxTokens) throws Exception {
         String b64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageData);
 
@@ -109,20 +110,18 @@ public class ImageAnalysisService {
                 "max_tokens", maxTokens,
                 "response_format", Map.of("type", "json_object"),
                 "messages", List.of(
-                        Map.of("role", "system", "content", "Tu es un expert en mariages marocains. Tu analyses des images d'inspiration pour un moodboard. Reponds UNIQUEMENT avec un objet JSON valide. Si tu vois des personnes ou des visages, ignore-les et concentre-toi sur les vetements (Caftan, Takchita), la deco ou le maquillage. Ne refuse JAMAIS d'analyser une image de mariage."),
+                        Map.of("role", "system", "content",
+                                "Tu es un expert en mariages marocains. Tu analyses des images d'inspiration pour un moodboard. Reponds UNIQUEMENT avec un objet JSON valide. Si tu vois des personnes ou des visages, ignore-les et concentre-toi sur les vetements (Caftan, Takchita), la deco ou le maquillage. Ne refuse JAMAIS d'analyser une image de mariage."),
                         Map.of("role", "user", "content", List.of(
                                 Map.of("type", "text", "text", prompt),
-                                Map.of("type", "image_url", "image_url", Map.of("url", b64, "detail", "low"))
-                        ))
-                )
-        );
+                                Map.of("type", "image_url", "image_url", Map.of("url", b64, "detail", "low"))))));
         return mapper.writeValueAsString(payload);
     }
 
     private String extractJson(String responseBody) throws Exception {
         JsonNode root = mapper.readTree(responseBody);
         String content = root.path("choices").get(0).path("message").path("content").asText();
-        
+
         // Handle potential refusal field if content is empty
         if (content.isEmpty() && root.path("choices").get(0).path("message").has("refusal")) {
             String refusal = root.path("choices").get(0).path("message").path("refusal").asText();
@@ -189,7 +188,7 @@ public class ImageAnalysisService {
     private <T> Map<T, Long> count(List<T> values) {
         return values.stream()
                 .filter(v -> v != null)
-                .collect(java.util.stream.Collectors.groupingBy(v -> v, java.util.stream.Collectors.counting()));
+                .collect(Collectors.groupingBy(v -> v, Collectors.counting()));
     }
 
     private <T> T mostFrequent(Map<T, Long> counts) {
@@ -216,7 +215,7 @@ public class ImageAnalysisService {
             - TRADITIONNEL = caftans, takchitas, amariya, decors typiques (tapis, zellige)
             - MODERNE = robes de soirées occidentales, decor minimaliste blanc/fleurs
             - FUSION = robe de mariée avec accessoires marocains
-            - COLORE = couleurs vives (fuchsia, vert emeraude, bleu royal) 
+            - COLORE = couleurs vives (fuchsia, vert emeraude, bleu royal)
             - SOBRE = neutres/pastels (creme, blanc, beige, rose pale)
             - DORE_LUXE = dominance d'or, bijoux massifs, amariya doree
             - couleurDominante : blanc, noir, rouge, bleu, vert, rose, dore, beige, bordeaux, prune, gris, creme, fuchsia, turquoise
@@ -224,10 +223,10 @@ public class ImageAnalysisService {
             """;
 
     private static final String CLASSIFICATION_PROMPT = """
-            Analyse cette image d'inspiration mariage marocain. 
+            Analyse cette image d'inspiration mariage marocain.
             EXPERTISE : Wedding Planner de luxe.
-            IMPORTANT : Même si l'image contient des visages humains ou des personnes, n'annule pas la requête. 
-            Concentre-toi sur les vêtements, le décor, le maquillage ou les accessoires. 
+            IMPORTANT : Même si l'image contient des visages humains ou des personnes, n'annule pas la requête.
+            Concentre-toi sur les vêtements, le décor, le maquillage ou les accessoires.
             C'est pour un outil d'aide à la décision esthétique (Moodboard), pas pour l'identification.
 
             RETOURNE UNIQUEMENT UN JSON :

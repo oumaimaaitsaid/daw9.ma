@@ -26,24 +26,17 @@ public class CatalogueItem implements Serializable {
 
     private BigDecimal prix;
 
-    // Prix par personne (pour traiteur)
     private BigDecimal prixParPersonne;
 
-    // Catégorie parent: negafa, ziana, traiteur, photographe, dj
     private String categorie;
 
-    // Sous-catégorie: caftan, takchita, maquillage, etc.
     private String sousCategorie;
 
-    // Type spécifique (ex: pour lebsa -> fassiya, rbatiya, sahraouia, soussia,
-    // chamalia)
     private String type;
 
-    // Couleur dominante de la tenue (pour le matching par couleur)
     @Column(name = "couleur_dominante")
     private String couleurDominante;
 
-    // Champs dynamiques selon le type (couleurs secondaires optionnelles)
     @ElementCollection
     @CollectionTable(name = "cat_item_couleurs", joinColumns = @JoinColumn(name = "cat_item_id"))
     private Set<String> couleurs = new HashSet<>();
@@ -64,7 +57,6 @@ public class CatalogueItem implements Serializable {
     @CollectionTable(name = "cat_item_images", joinColumns = @JoinColumn(name = "cat_item_id"))
     private List<String> images = new ArrayList<>();
 
-    // Profil de style analysé par IA (pour le matching)
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "style", column = @Column(name = "style_profile_style")),

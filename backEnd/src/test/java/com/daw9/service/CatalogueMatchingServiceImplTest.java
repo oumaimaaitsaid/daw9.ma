@@ -1,5 +1,7 @@
 package com.daw9.service;
 
+import com.daw9.dto.CatalogueItemDTO;
+import com.daw9.mapper.CatalogueMapper;
 import com.daw9.model.*;
 import com.daw9.model.enums.*;
 import com.daw9.repository.CatalogueItemRepository;
@@ -27,6 +29,8 @@ class CatalogueMatchingServiceImplTest {
     private CatalogueItemRepository catalogueItemRepository;
     @Mock
     private MoodboardImageRepository moodboardRepo;
+    @Mock
+    private CatalogueMapper catalogueMapper;
 
     @InjectMocks
     private CatalogueMatchingServiceImpl matchingService;
@@ -41,7 +45,7 @@ class CatalogueMatchingServiceImplTest {
     void testGetSuggestionsNoImages() {
         when(moodboardRepo.findByClientId(clientId)).thenReturn(Collections.emptyList());
 
-        Map<String, Object> result = matchingService.getSuggestions(clientId);
+        Map<String, List<CatalogueItemDTO>> result = matchingService.getSuggestions(clientId);
 
         assertTrue(result.isEmpty());
     }
@@ -78,13 +82,17 @@ class CatalogueMatchingServiceImplTest {
 
         when(catalogueItemRepository.findBySousCategorie(eq("caftan"), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(item1, item2)));
+        
+        when(catalogueMapper.toDTO(any(CatalogueItem.class))).thenAnswer(invocation -> {
+            CatalogueItem item = invocation.getArgument(0);
+            return new CatalogueItemDTO(item.getId(), item.getNom(), null, null, null, null, null, null, null, null, null);
+        });
 
-        Map<String, Object> result = matchingService.getSuggestions(clientId);
+        Map<String, List<CatalogueItemDTO>> result = matchingService.getSuggestions(clientId);
 
         assertFalse(result.isEmpty());
         assertTrue(result.containsKey("caftan"));
-        List<CatalogueItem> suggestions = (List<CatalogueItem>) result.get("caftan");
-        // item1 should be first because of matching color and style
-        assertEquals("Caftan Royal", suggestions.get(0).getNom());
+        List<CatalogueItemDTO> suggestions = result.get("caftan");
+        assertEquals("Caftan Royal", suggestions.get(0).nom());
     }
 }
